@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Portal — SYNAPSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css"/>
+  <script src="/js/theme.js"></script>
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background: var(--bg); }
+    .auth-wrap { width:100%; max-width:440px; padding: 2rem; }
+    .auth-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2.5rem 2rem; position: relative; overflow: hidden; }
+    .auth-logo { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:.5rem; margin-bottom:1.5rem; }
+    .auth-card h1 { font-size:1.6rem; margin-bottom:.4rem; }
+    .auth-card p { color:var(--text-secondary); font-size:.9rem; margin-bottom:2rem; }
+    
+    .form-group { margin-bottom:1.2rem; }
+    .form-group label { display:block; font-size:.82rem; font-weight:500; margin-bottom:.4rem; color:var(--text-secondary); }
+    .form-group input { width:100%; padding:.75rem 1rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.95rem; font-family:inherit; outline:none; transition:.2s; box-sizing:border-box; }
+    .form-group input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+    
+    .btn-auth { width:100%; padding:.8rem; background:var(--accent); color:#fff; border:none; border-radius:8px; font-size:1rem; font-family:inherit; font-weight:600; cursor:pointer; transition:.2s; margin-top:.5rem; }
+    .btn-auth:hover { background:var(--accent-hover); }
+    .btn-auth:disabled { opacity:.6; cursor:not-allowed; }
+    
+    .auth-error { background:rgba(239, 68, 68, 0.15); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding:.75rem 1rem; border-radius:8px; font-size:.88rem; margin-bottom:1rem; display:none; }
+    .auth-success { background:rgba(34, 197, 94, 0.15); color:var(--success); border: 1px solid rgba(34, 197, 94, 0.3); padding:.75rem 1rem; border-radius:8px; font-size:.88rem; margin-bottom:1rem; display:none; }
+    
+    .toggle-link { display:block; text-align:center; margin-top:1.5rem; color:var(--muted); font-size:.88rem; cursor: pointer; }
+    .toggle-link span { color:var(--accent); font-weight:600; }
+    .toggle-link span:hover { text-decoration: underline; }
+    
+    .back-btn { position: absolute; top: 2.5rem; right: 2rem; color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: 0.2s; }
+    .back-btn:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <a href="/" class="back-btn">✕</a>
+    <div class="auth-logo">⬡ SYNAPSE</div>
+    
+    <!-- Login Form -->
+    <div id="loginSection">
+      <h1>Student Login</h1>
+      <p>Log in to access your dashboard and premium content.</p>
+      
+      <div class="auth-error" id="loginError"></div>
+      <div class="auth-success" id="loginSuccess"></div>
+
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="lUsername" placeholder="Enter your username" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="lEmail" placeholder="your.email@example.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="lPassword" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      
+      <button class="btn-auth" id="loginBtn" onclick="doLogin()">Log In</button>
+      
+      <div class="toggle-link" onclick="toggleForm('register')">Don't have an account? <span>Register</span></div>
+    </div>
+
+    <!-- Registration Form -->
+    <div id="registerSection" style="display:none;">
+      <h1>Create Account</h1>
+      <p>Join SYNAPSE to unlock free notes, pyqs and premium material.</p>
+      
+      <div class="auth-error" id="regError"></div>
+      <div class="auth-success" id="regSuccess"></div>
+
+      <div class="form-group">
+        <label>Choose a Username</label>
+        <input type="text" id="rUsername" placeholder="e.g. rahul123" autocomplete="off"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="rEmail" placeholder="your.email@example.com" autocomplete="off"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="rPassword" placeholder="Minimum 6 characters" autocomplete="new-password"/>
+      </div>
+      
+      <button class="btn-auth" id="regBtn" onclick="doRegister()">Sign Up</button>
+      
+      <div class="toggle-link" onclick="toggleForm('login')">Already have an account? <span>Log In</span></div>
+    </div>
+
+    </div>
+    
+  </div>
+</div>
+
+<script>
+  // Auth Form Toggle Logic
+  function toggleForm(target) {
+    document.getElementById('loginSection').style.display = target === 'login' ? 'block' : 'none';
+    document.getElementById('registerSection').style.display = target === 'register' ? 'block' : 'none';
+    clearMsgs();
+  }
+
+  function clearMsgs() {
+    ['loginError', 'loginSuccess', 'regError', 'regSuccess'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+  }
+
+  function showMsg(id, msg) {
+    clearMsgs();
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  // Redirect if already logged in
+  fetch('/student/status').then(r=>r.json()).then(d=>{
+    if(d.loggedIn) window.location.href='/';
+  });
+
+  async function doLogin() {
+    const btn = document.getElementById('loginBtn');
+    const username = document.getElementById('lUsername').value.trim();
+    const email = document.getElementById('lEmail').value.trim();
+    const password = document.getElementById('lPassword').value;
+
+    if(!username || !email || !password){ showMsg('loginError', 'Please fill all fields.'); return; }
+
+    btn.disabled=true; btn.textContent='Logging in…';
+    
+    try {
+      const res = await fetch('/student/login',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, email, password})
+      });
+      const data = await res.json();
+      if(data.success) {
+        showMsg('loginSuccess', 'Welcome back!');
+        setTimeout(() => window.location.href='/', 800);
+      } else {
+        showMsg('loginError', data.error || 'Login failed.');
+        btn.disabled=false; btn.textContent='Log In';
+      }
+    } catch(e) {
+      showMsg('loginError', 'Network error.');
+      btn.disabled=false; btn.textContent='Log In';
+    }
+  }
+
+  async function doRegister() {
+    const btn = document.getElementById('regBtn');
+    const username = document.getElementById('rUsername').value.trim();
+    const email = document.getElementById('rEmail').value.trim();
+    const password = document.getElementById('rPassword').value;
+
+    if(!username || !email || !password){ showMsg('regError', 'Please fill all fields.'); return; }
+    if(password.length < 6){ showMsg('regError', 'Password must be at least 6 characters.'); return; }
+
+    btn.disabled=true; btn.textContent='Creating account…';
+    
+    try {
+      const res = await fetch('/student/register',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, email, password})
+      });
+      const data = await res.json();
+      if(data.success) {
+        showMsg('regSuccess', 'Account created! Redirecting...');
+        setTimeout(() => window.location.href='/', 1000);
+      } else {
+        showMsg('regError', data.error || 'Registration failed.');
+        btn.disabled=false; btn.textContent='Sign Up';
+      }
+    } catch(e) {
+      showMsg('regError', 'Network error.');
+      btn.disabled=false; btn.textContent='Sign Up';
+    }
+  }
+
+  // Enter key support
+  document.getElementById('loginSection').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+  document.getElementById('registerSection').addEventListener('keydown', e => { if(e.key === 'Enter') doRegister(); });
+</script>
+</body>
+</html>

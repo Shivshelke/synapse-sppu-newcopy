@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — SYNAPSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="/js/theme.js"></script>
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 420px;
+      padding: 2rem;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+    }
+
+    .login-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: 2rem;
+    }
+
+    .login-card h1 {
+      font-size: 1.6rem;
+      margin-bottom: .4rem;
+    }
+
+    .login-card p {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 500;
+      margin-bottom: .4rem;
+      color: var(--text-secondary);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: .75rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .95rem;
+      font-family: inherit;
+      outline: none;
+      transition: .2s;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: .8rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .2s;
+      margin-top: .5rem;
+    }
+
+    .btn-login:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-login:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .login-error {
+      background: #fee2e2;
+      color: #b91c1c;
+      padding: .75rem 1rem;
+      border-radius: 8px;
+      font-size: .88rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .back-link a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 2rem;">
+        <div class="login-logo" style="margin-bottom:0;">⬡ SYNAPSE</div>
+        <button onclick="toggleTheme()" class="btn-ghost theme-toggle"
+          style="border:none; background:transparent; padding:0!important; cursor:pointer;" title="Toggle Theme"><span
+            class="theme-icon">☀️</span></button>
+      </div>
+      <h1>Admin Login</h1>
+      <p>Only authorized administrators can access the dashboard.</p>
+
+      <div class="login-error" id="loginError"></div>
+
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="admin" autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In →</button>
+
+      <div class="back-link"><a href="/">← Back to portal</a></div>
+    </div>
+  </div>
+
+  <script>
+    // Check if already logged in
+    fetch('/auth/status').then(r => r.json()).then(d => {
+      if (d.loggedIn) window.location.href = '/admin/dashboard';
+    });
+
+    async function doLogin() {
+      const btn = document.getElementById('loginBtn');
+      const err = document.getElementById('loginError');
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      err.style.display = 'none';
+      if (!username || !password) { showError('Please enter username and password.'); return; }
+
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (data.success) { window.location.href = '/admin/dashboard'; }
+        else { showError(data.error || 'Login failed.'); }
+      } catch (e) { showError('Network error. Please try again.'); }
+      finally { btn.disabled = false; btn.textContent = 'Sign In →'; }
+    }
+
+    function showError(msg) { const e = document.getElementById('loginError'); e.textContent = msg; e.style.display = 'block'; }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  </script>
+</body>
+
+</html>

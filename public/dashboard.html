@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — SYNAPSE Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/dashboard.css"/>
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="sidebar-logo">⬡</span>
+    <span>SYNAPSE</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-panel="upload">
+      <span class="nav-icon">↑</span> Upload Paper
+    </a>
+    <a href="#" class="nav-item" data-panel="files">
+      <span class="nav-icon">☰</span> Manage Files
+    </a>
+    <a href="#" class="nav-item" data-panel="categories">
+      <span class="nav-icon">⊞</span> Categories
+    </a>
+    <a href="#" class="nav-item" data-panel="students">
+      <span class="nav-icon">👥</span> Students
+    </a>
+    <a href="#" class="nav-item" data-panel="premium">
+      <span class="nav-icon">✨</span> Premium
+    </a>
+    <a href="#" class="nav-item" data-panel="feedback">
+      <span class="nav-icon">💬</span> Feedback
+    </a>
+    <a href="#" class="nav-item" data-panel="password">
+      <span class="nav-icon">🔑</span> Change Password
+    </a>
+    <div class="nav-divider"></div>
+    <a href="/" class="nav-item" target="_blank">
+      <span class="nav-icon">⬡</span> View Site
+    </a>
+    <a href="#" class="nav-item logout" onclick="doLogout()">
+      <span class="nav-icon">→</span> Logout
+    </a>
+  </nav>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-title" id="topbarTitle">Upload Paper</div>
+    <div class="topbar-right" style="display:flex; align-items:center; gap:1rem;">
+      <button onclick="toggleTheme()" class="btn-ghost theme-toggle" title="Toggle Theme" style="border:none; background:transparent; cursor:pointer; font-size:1.1rem; padding:0;"><span class="theme-icon">☀️</span></button>
+      <span class="admin-badge">Admin</span>
+    </div>
+  </header>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-val" id="dTotal">—</div>
+      <div class="stat-lbl">Total Papers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="dFirst">—</div>
+      <div class="stat-lbl">1st Year</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="dSecond">—</div>
+      <div class="stat-lbl">2nd Year</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="dThird">—</div>
+      <div class="stat-lbl">3rd Year</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="dFourth">—</div>
+      <div class="stat-lbl">4th Year</div>
+    </div>
+    <div class="stat-card" style="border-color:var(--accent);">
+      <div class="stat-val" id="dStudents" style="color:var(--accent)">—</div>
+      <div class="stat-lbl">Total Students</div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL: UPLOAD ══ -->
+  <section class="panel active" id="panel-upload">
+    <div class="panel-header"><h2>Upload Question Paper</h2></div>
+
+    <div class="upload-layout">
+      <!-- Form -->
+      <div class="upload-form-card">
+        <div class="alert" id="uploadAlert" style="display:none"></div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Year <span class="req">*</span></label>
+            <select id="upYear" onchange="onYearChange()">
+              <option value="">— Select Year —</option>
+              <option value="first">1st Year</option>
+              <option value="second">2nd Year</option>
+              <option value="third">3rd Year</option>
+              <option value="fourth">4th Year</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Branch <span class="req">*</span></label>
+            <select id="upBranch" disabled onchange="onBranchChange()">
+              <option value="">— Select Branch —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Subject <span class="req">*</span></label>
+          <select id="upSubject" disabled>
+            <option value="">— Select Subject —</option>
+            <option value="__custom__">+ Type custom subject…</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="customSubjectGroup" style="display:none">
+          <label>Custom Subject Name</label>
+          <input type="text" id="upCustomSubject" placeholder="Enter subject name…"/>
+        </div>
+
+        <div class="form-group" id="customFileNameGroup">
+          <label>Custom File Name (Optional)</label>
+          <input type="text" id="upCustomFileName" placeholder="e.g. 2023_Insem_Maths.pdf"/>
+        </div>
+
+        <div class="form-group">
+          <label>PDF File <span class="req">*</span></label>
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('pdfInput').click()">
+            <div class="drop-icon">⬆</div>
+            <div class="drop-text">Click to select or drag & drop PDF</div>
+            <div class="drop-hint">Maximum file size: 20 MB</div>
+            <input type="file" id="pdfInput" accept=".pdf" style="display:none" onchange="onFileSelect(this)"/>
+          </div>
+          <div class="file-preview" id="filePreview" style="display:none">
+            <span id="fileName"></span>
+            <button onclick="clearFile()">✕</button>
+          </div>
+        </div>
+
+        <div class="upload-progress" id="uploadProgress" style="display:none">
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          <span id="progressText">Uploading…</span>
+        </div>
+
+        <button class="btn-primary" id="uploadBtn" onclick="doUpload()">Upload Paper →</button>
+      </div>
+
+      <!-- Recent uploads -->
+      <div class="recent-card">
+        <div class="recent-header">Recent Uploads</div>
+        <div id="recentList"><div class="empty-state small">No files yet</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PANEL: FILES ══ -->
+  <section class="panel" id="panel-files">
+    <div class="panel-header">
+      <h2>Manage Files</h2>
+      <div class="filter-bar">
+        <select id="filterYear" onchange="loadAdminFiles()">
+          <option value="">All Years</option>
+          <option value="first">1st Year</option>
+          <option value="second">2nd Year</option>
+          <option value="third">3rd Year</option>
+          <option value="fourth">4th Year</option>
+        </select>
+        <input type="text" id="filterSearch" placeholder="Search files…" oninput="loadAdminFiles()"/>
+      </div>
+    </div>
+    <div id="adminFileList"></div>
+  </section>
+
+  <!-- ══ PANEL: CATEGORIES ══ -->
+  <section class="panel" id="panel-categories">
+    <div class="panel-header"><h2>Manage Categories</h2></div>
+
+    <div class="cat-grid">
+      <div class="cat-card">
+        <h3>Add Subject to a Year</h3>
+        <div class="form-group">
+          <label>Year</label>
+          <select id="catYear">
+            <option value="first">1st Year</option>
+            <option value="second">2nd Year</option>
+            <option value="third">3rd Year</option>
+            <option value="fourth">4th Year</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Subject Name</label>
+          <input type="text" id="catSubject" placeholder="e.g. Data Structures"/>
+        </div>
+        <button class="btn-primary small" onclick="addSubject()">Add Subject</button>
+        <div id="catAlert" class="alert" style="display:none;margin-top:1rem"></div>
+      </div>
+
+      <div class="cat-card">
+        <h3>Add Branch to a Year</h3>
+        <div class="form-group">
+          <label>Year</label>
+          <select id="catBYear">
+            <option value="second">2nd Year</option>
+            <option value="third">3rd Year</option>
+            <option value="fourth">4th Year</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Branch Name</label>
+          <input type="text" id="catBranch" placeholder="e.g. Robotics Engineering"/>
+        </div>
+        <button class="btn-primary small" onclick="addBranch()">Add Branch</button>
+        <div id="catBAlert" class="alert" style="display:none;margin-top:1rem"></div>
+      </div>
+    </div>
+
+    <div class="cat-preview">
+      <h3>Current Structure</h3>
+      <div id="catStructure"></div>
+    </div>
+  </section>
+
+  <!-- ══ PANEL: PREMIUM ══ -->
+  <section class="panel" id="panel-premium">
+    <div class="panel-header"><h2>Premium Content Admin</h2></div>
+    <div class="upload-layout">
+      <!-- Premium Upload Form -->
+      <div class="upload-form-card">
+        <div class="alert" id="premiumAlert" style="display:none"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Premium Type <span class="req">*</span></label>
+            <select id="prmType">
+              <option value="">— Select Type —</option>
+              <option value="solved-pyq">Solved PYQs</option>
+              <option value="notes">Handwritten Notes</option>
+              <option value="practice">Practice Bank</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Year</label>
+            <select id="prmYear">
+              <option value="">— Any Year —</option>
+              <option value="first">1st Year</option>
+              <option value="second">2nd Year</option>
+              <option value="third">3rd Year</option>
+              <option value="fourth">4th Year</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Subject / Topic Name <span class="req">*</span></label>
+          <input type="text" id="prmSubject" placeholder="e.g., Engineering Mathematics - I"/>
+        </div>
+        <div class="form-group">
+          <label>Custom File Name (Optional)</label>
+          <input type="text" id="prmCustomName" placeholder="e.g., Topper_Notes_EM1.pdf"/>
+        </div>
+        <div class="form-group">
+          <label>PDF File <span class="req">*</span></label>
+          <div class="dropzone" id="prmDropzone" onclick="document.getElementById('prmPdfInput').click()">
+            <div class="drop-icon">⬆</div>
+            <div class="drop-text">Click to select PDF or drag & drop</div>
+            <input type="file" id="prmPdfInput" accept=".pdf" style="display:none" onchange="window.onPremiumFileSelect(this)"/>
+          </div>
+          <div class="file-preview" id="prmFilePreview" style="display:none">
+            <span id="prmFileNameDisplay"></span>
+            <button onclick="window.clearPremiumFile()">✕</button>
+          </div>
+        </div>
+        <div class="upload-progress" id="prmUploadProgress" style="display:none">
+          <div class="progress-bar"><div class="progress-fill" id="prmProgressFill"></div></div>
+          <span id="prmProgressText">Uploading…</span>
+        </div>
+        <button class="btn-primary" id="prmUploadBtn" onclick="window.doPremiumUpload()">Upload Premium File ✨</button>
+      </div>
+
+      <!-- Premium manage list -->
+      <div class="recent-card" style="overflow-y:auto; max-height:800px;">
+        <div class="recent-header" style="display:flex; justify-content:space-between; align-items:center;">
+            Manage Premium Files
+            <button class="btn-ghost small" onclick="window.loadPremiumAdminFiles()">↻</button>
+        </div>
+        <div id="premiumAdminFileList"><div class="empty-state small">No premium files yet</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PANEL: FEEDBACK ══ -->
+  <section class="panel" id="panel-feedback">
+    <div class="panel-header">
+      <h2>User Feedback</h2>
+      <button class="btn-ghost" onclick="loadFeedback()">↻ Refresh</button>
+    </div>
+    <div id="adminFeedbackList"></div>
+  </section>
+
+  <!-- ══ PANEL: STUDENTS ══ -->
+  <section class="panel" id="panel-students">
+    <div class="panel-header">
+      <h2>Student Accounts / Activity</h2>
+      <button class="btn-ghost" onclick="window.loadAdminStudents()">↻ Refresh</button>
+    </div>
+    <div class="table-card">
+      <div id="adminStudentList">
+        <div class="empty-state">Loading students…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PANEL: PASSWORD ══ -->
+  <section class="panel" id="panel-password">
+    <div class="panel-header"><h2>Change Password</h2></div>
+    <div class="narrow-form">
+      <div class="alert" id="pwAlert" style="display:none"></div>
+      <div class="form-group">
+        <label>Current Password</label>
+        <input type="password" id="pwCurrent" placeholder="••••••••"/>
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="pwNew" placeholder="Minimum 8 characters"/>
+      </div>
+      <div class="form-group">
+        <label>Confirm New Password</label>
+        <input type="password" id="pwConfirm" placeholder="Repeat new password"/>
+      </div>
+      <button class="btn-primary" onclick="doChangePassword()">Update Password</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal-overlay" id="deleteModal" style="display:none">
+  <div class="modal">
+    <div class="modal-icon">⚠</div>
+    <h3>Delete Paper?</h3>
+    <p id="deleteModalText">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

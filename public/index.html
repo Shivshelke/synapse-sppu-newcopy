@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SYNAPSE — SPPU PYQ Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css"/>
+  <script src="/js/theme.js"></script>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="nav-logo">⬡</span>
+    <span>SYNAPSE</span>
+  </div>
+  <div class="nav-links">
+    <a href="#years">Browse</a>
+    <a href="#premium">Premium <span style="color:#f59e0b;font-size:0.75rem;vertical-align:top;font-weight:bold;">PRO</span></a>
+    <a href="#about">About</a>
+    <a href="#feedback">Feedback</a>
+    <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px;">
+      <a href="/student-login.html" class="btn-ghost" style="color:var(--accent)!important; border-color:var(--accent)">Login / Register</a>
+    </div>
+    <a href="/login.html" class="btn-ghost" title="Admin">Admin</a>
+    <button onclick="toggleTheme()" class="btn-ghost theme-toggle" title="Toggle Theme"><span class="theme-icon">☀️</span></button>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<header class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">SPPU Previous Year Questions</div>
+    <h1>SYNAPSE <span class="accent">PYQ</span></h1>
+    <p class="hero-sub">Access, browse, and download previous year question papers for SPPU Engineering — organized by year, branch & subject.</p>
+
+    <div class="search-wrap" style="position:relative;">
+      <input id="globalSearch" type="text" placeholder="Search papers, subjects, branches…" autocomplete="off" oninput="showSuggestions(this.value)" onfocus="showSuggestions(this.value)" onblur="setTimeout(()=>hideSuggestions(), 200)"/>
+      <button onclick="doGlobalSearch()">Search</button>
+      <div id="searchSuggestions" class="suggestions-dropdown" style="display:none;"></div>
+    </div>
+  </div>
+  <div class="hero-stats" id="heroStats">
+    <div class="stat"><span class="stat-num" id="statTotal">—</span><span class="stat-label">Papers</span></div>
+    <div class="stat-div"></div>
+    <div class="stat"><span class="stat-num">4</span><span class="stat-label">Years</span></div>
+    <div class="stat-div"></div>
+    <div class="stat"><span class="stat-num">10+</span><span class="stat-label">Branches</span></div>
+  </div>
+</header>
+
+<!-- ── SEARCH RESULTS (hidden by default) ── -->
+<section id="searchResults" style="display:none" class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Search Results</h2>
+      <button class="btn-ghost small" onclick="clearSearch()">← Back</button>
+    </div>
+    <div class="file-grid" id="searchGrid"></div>
+  </div>
+</section>
+
+<!-- ── YEAR CARDS ── -->
+<section id="years" class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Browse by Year</h2>
+      <p>Select your year to explore branches and subjects</p>
+    </div>
+    <div class="year-grid">
+      <div class="year-card" onclick="selectYear('first')">
+        <div class="year-icon">I</div>
+        <div class="year-label">1st Year</div>
+        <div class="year-sub">Common subjects for all branches</div>
+        <div class="year-count" id="count-first">— papers</div>
+      </div>
+      <div class="year-card" onclick="selectYear('second')">
+        <div class="year-icon">II</div>
+        <div class="year-label">2nd Year</div>
+        <div class="year-sub">Branch-specific courses begin</div>
+        <div class="year-count" id="count-second">— papers</div>
+      </div>
+      <div class="year-card" onclick="selectYear('third')">
+        <div class="year-icon">III</div>
+        <div class="year-label">3rd Year</div>
+        <div class="year-sub">Advanced engineering subjects</div>
+        <div class="year-count" id="count-third">— papers</div>
+      </div>
+      <div class="year-card" onclick="selectYear('fourth')">
+        <div class="year-icon">IV</div>
+        <div class="year-label">4th Year</div>
+        <div class="year-sub">Final year specializations</div>
+        <div class="year-count" id="count-fourth">— papers</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── BROWSER PANEL ── -->
+<section id="browserPanel" style="display:none" class="section browser-section">
+  <div class="container">
+    <div class="browser-header">
+      <button class="back-btn" onclick="goBack()">← Back</button>
+      <h2 id="panelTitle">Select Branch</h2>
+    </div>
+
+    <!-- Branch selection -->
+    <div id="branchStep">
+      <p class="step-hint">Choose your branch</p>
+      <div class="tag-grid" id="branchGrid"></div>
+    </div>
+
+    <!-- Subject selection -->
+    <div id="subjectStep" style="display:none">
+      <p class="step-hint">Choose a subject</p>
+      <div class="tag-grid" id="subjectGrid"></div>
+    </div>
+
+    <!-- File listing -->
+    <div id="fileStep" style="display:none">
+      <div class="file-list-header">
+        <p class="step-hint" id="fileStepLabel">Papers available</p>
+        <input type="text" id="localSearch" placeholder="Filter files…" oninput="filterLocal(this.value)"/>
+      </div>
+      <div class="file-grid" id="fileGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PREMIUM SECTION ── -->
+<section id="premium" class="section premium-section">
+  <div class="container relative">
+    <div class="premium-header">
+      <h2>Premium Content <span class="premium-badge">PRO</span></h2>
+      <p>Unlock exclusive learning materials curated for top performance.</p>
+    </div>
+
+    <div class="premium-card" id="premiumCard">
+      <!-- Logged Out State -->
+      <div class="premium-state locked-state active show" id="loggedOutState">
+        <div class="lock-icon">🔒</div>
+        <h3>Premium Access</h3>
+        <p>Login to your account to view or buy Premium features.</p>
+        <button class="btn-premium" onclick="checkPremiumLogin()">Login / Register ✨</button>
+      </div>
+
+      <!-- Free State (Logged In, Not Premium) -->
+      <div class="premium-state locked-state" id="freeState">
+        <div class="lock-icon">🛍️</div>
+        <h3>Unlock Premium for ₹99</h3>
+        <p>Get unlimited access to solved PYQs, handwritten notes, and topic-wise practice questions.</p>
+        <button class="btn-premium" id="buyPremiumBtn" onclick="buyPremium()">Buy Premium Now ✨</button>
+      </div>
+
+      <!-- Unlocked State -->
+      <div class="premium-state unlocked-state" id="unlockedState">
+        <div class="unlocked-header">
+          <div class="unlock-icon">🔓</div>
+          <h3 id="premiumWelcomeText">Welcome to Premium, Student!</h3>
+        </div>
+        <div class="premium-content-grid">
+          <div class="premium-item">
+            <div class="premium-item-icon">📄</div>
+            <h4>Solved PYQs</h4>
+            <p>Detailed step-by-step solutions for past 5 years.</p>
+            <button class="btn-outline" onclick="openPremiumModal('solved-pyq')">Access</button>
+          </div>
+          <div class="premium-item">
+            <div class="premium-item-icon">📝</div>
+            <h4>Handwritten Notes</h4>
+            <p>Topper's notes organized by units and chapters.</p>
+            <button class="btn-outline" onclick="openPremiumModal('notes')">Access</button>
+          </div>
+          <div class="premium-item">
+            <div class="premium-item-icon">🎯</div>
+            <h4>Practice Bank</h4>
+            <p>Topic-wise expected questions for exams.</p>
+            <button class="btn-outline" onclick="openPremiumModal('practice')">Access</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section id="about" class="section about-section">
+  <div class="container about-inner">
+    <div class="about-text">
+      <h2>What is SYNAPSE?</h2>
+      <p>SYNAPSE is a free PYQ portal built for SPPU engineering students. Find previous year question papers organized by year, branch, and subject — no registration, no paywalls.</p>
+      <ul class="feature-list">
+        <li>✦ Free to access and download</li>
+        <li>✦ Organized by Year → Branch → Subject</li>
+        <li>✦ PDFs directly from SPPU exams</li>
+        <li>✦ Fast search across all papers</li>
+      </ul>
+    </div>
+    <div class="about-card">
+      <div class="about-card-icon">🎓</div>
+      <div class="about-card-text">Savitribai Phule Pune University</div>
+      <div class="about-card-sub">Engineering PYQ Archive</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEEDBACK ── -->
+<section id="feedback" class="section feedback-section">
+  <div class="container feedback-inner">
+    <div class="feedback-text">
+      <h2>Have Feedback or Missing a Paper?</h2>
+      <p>Let us know if you couldn't find a paper or have any suggestions for the portal. We review all feedback!</p>
+      <div id="feedbackAlert" class="alert" style="display:none; margin-top:1rem;"></div>
+    </div>
+    <div class="feedback-form-card">
+      <div class="feedback-form-group">
+        <label>Your Name (Optional)</label>
+        <input type="text" id="fbName" placeholder="e.g. Rahul"/>
+      </div>
+      <div class="feedback-form-group">
+        <label>Message <span class="req">*</span></label>
+        <textarea id="fbMessage" rows="5" placeholder="Type your message here…"></textarea>
+      </div>
+      <button class="btn-primary" id="fbBtn" onclick="submitFeedback()">Send Feedback</button>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <span class="footer-brand">⬡ SYNAPSE</span>
+    <span>SPPU PYQ Portal — For students, by students.</span>
+    <a href="/login.html">Admin</a>
+  </div>
+</footer>
+
+<!-- ── Premium Modal ── -->
+<div id="premiumModal" class="modal-overlay" onclick="closePremiumModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closePremiumModal()">&times;</button>
+    <div class="modal-header">
+      <div id="prmModalIcon" class="premium-item-icon" style="font-size:3rem; margin-bottom:0.5rem">📄</div>
+      <h3 id="prmModalTitle">Solved PYQs</h3>
+    </div>
+    <div class="modal-body">
+      <p id="prmModalDesc">Select a subject to view step-by-step solutions curated by our top educators and previous year toppers.</p>
+      <ul class="modal-list" id="prmModalList">
+        <!-- populated dynamically -->
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script src="/js/main.js"></script>
+</body>
+</html>
