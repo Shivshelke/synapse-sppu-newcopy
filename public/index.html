@@ -235,11 +235,18 @@
 
 <footer class="footer">
   <div class="container">
-    <span class="footer-brand">⬡ SYNAPSE</span>
-    <span>SPPU PYQ Portal — For students, by students.</span>
-    <a href="/login.html">Admin</a>
+    <div class="footer-top">
+      <span class="footer-brand">⬡ SYNAPSE</span>
+      <span>SPPU PYQ Portal — For students, by students.</span>
+      <a href="/login.html">Admin</a>
+    </div>
+    <div class="footer-copyright">
+      © <span id="footerYear"></span> SYNAPSE SPPU PYQ Portal. All rights reserved. &nbsp;|&nbsp;
+      Made with ❤️ for SPPU Students
+    </div>
   </div>
 </footer>
+<script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
 
 <!-- ── Premium Modal ── -->
 <div id="premiumModal" class="modal-overlay" onclick="closePremiumModal(event)">
