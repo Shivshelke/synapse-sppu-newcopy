@@ -17,17 +17,20 @@
     <span class="nav-logo">⬡</span>
     <span>SYNAPSE</span>
   </div>
-  <div class="nav-links">
-    <a href="#years">Browse</a>
-    <a href="#premium">Premium <span style="color:#f59e0b;font-size:0.75rem;vertical-align:top;font-weight:bold;">PRO</span></a>
-    <a href="#about">About</a>
-    <a href="#feedback">Feedback</a>
+  <div class="nav-links" id="navLinks">
+    <a href="#years" onclick="closeMobileMenu()">Browse</a>
+    <a href="#premium" onclick="closeMobileMenu()">Premium <span style="color:#f59e0b;font-size:0.75rem;vertical-align:top;font-weight:bold;">PRO</span></a>
+    <a href="#about" onclick="closeMobileMenu()">About</a>
+    <a href="#feedback" onclick="closeMobileMenu()">Feedback</a>
     <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px;">
       <a href="/student-login.html" class="btn-ghost" style="color:var(--accent)!important; border-color:var(--accent)">Login / Register</a>
     </div>
     <a href="/login.html" class="btn-ghost" title="Admin">Admin</a>
     <button onclick="toggleTheme()" class="btn-ghost theme-toggle" title="Toggle Theme"><span class="theme-icon">☀️</span></button>
   </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- ── HERO ── -->

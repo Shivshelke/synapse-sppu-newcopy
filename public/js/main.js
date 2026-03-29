@@ -3,6 +3,18 @@
  * Public portal — browse, search, download files.
  */
 
+// ── Mobile Menu ──────────────────────────────────────────────────────────────
+function toggleMobileMenu() {
+  const nav = document.getElementById('navLinks');
+  const btn = document.getElementById('hamburger');
+  nav.classList.toggle('mobile-open');
+  btn.classList.toggle('open');
+}
+function closeMobileMenu() {
+  document.getElementById('navLinks').classList.remove('mobile-open');
+  document.getElementById('hamburger').classList.remove('open');
+}
+
 let CONFIG = {};
 let currentYear = null;
 let currentBranch = null;
