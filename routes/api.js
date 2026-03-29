@@ -3,9 +3,32 @@
  */
 const express    = require('express');
 const nodemailer = require('nodemailer');
+const https      = require('https');
+const http       = require('http');
 const router     = express.Router();
 const File       = require('../models/File');
 const Feedback   = require('../models/Feedback');
+
+// GET /api/download/:id — proxy PDF with correct content-type
+router.get('/download/:id', async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
+
+    const fileUrl = file.url;
+    const filename = (file.originalName || file.subject || 'file').replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    const protocol = fileUrl.startsWith('https') ? https : http;
+    protocol.get(fileUrl, (proxyRes) => {
+      proxyRes.pipe(res);
+    }).on('error', () => res.status(500).json({ error: 'Download failed.' }));
+  } catch(e) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
 
 // Hardcoded config (year/branch/subject taxonomy stored in memory)
 const CONFIG = {

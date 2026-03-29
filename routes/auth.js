@@ -6,16 +6,29 @@ const express = require('express');
 const bcrypt  = require('bcryptjs');
 const router  = express.Router();
 
+// Hash is computed once at startup from ADMIN_PASSWORD env var
+// This avoids $ sign corruption in Railway environment variables
+let adminPasswordHash = null;
+
+async function getAdminHash() {
+  if (!adminPasswordHash) {
+    const pwd = process.env.ADMIN_PASSWORD || 'Admin@Synapse2024';
+    adminPasswordHash = await bcrypt.hash(pwd, 10);
+  }
+  return adminPasswordHash;
+}
+
 // POST /auth/login
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password)
     return res.status(400).json({ error: 'Username and password required.' });
 
-  if (username !== process.env.ADMIN_USERNAME)
+  if (username !== (process.env.ADMIN_USERNAME || 'Synapse07'))
     return res.status(401).json({ error: 'Invalid credentials.' });
 
-  const valid = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+  const hash  = await getAdminHash();
+  const valid = await bcrypt.compare(password, hash);
   if (!valid) return res.status(401).json({ error: 'Invalid credentials.' });
 
   req.session.isAdmin   = true;
@@ -34,7 +47,7 @@ router.get('/status', (req, res) => {
   res.json({ loggedIn: !!(req.session && req.session.isAdmin) });
 });
 
-// POST /auth/change-password — updates env hash in memory only (restart resets)
+// POST /auth/change-password
 router.post('/change-password', async (req, res) => {
   if (!req.session || !req.session.isAdmin)
     return res.status(401).json({ error: 'Unauthorized.' });
@@ -45,10 +58,11 @@ router.post('/change-password', async (req, res) => {
   if (newPassword.length < 8)
     return res.status(400).json({ error: 'New password must be at least 8 characters.' });
 
-  const valid = await bcrypt.compare(currentPassword, process.env.ADMIN_PASSWORD_HASH);
+  const hash  = await getAdminHash();
+  const valid = await bcrypt.compare(currentPassword, hash);
   if (!valid) return res.status(401).json({ error: 'Current password is incorrect.' });
 
-  process.env.ADMIN_PASSWORD_HASH = await bcrypt.hash(newPassword, 10);
+  adminPasswordHash = await bcrypt.hash(newPassword, 10);
   res.json({ success: true, message: 'Password updated for this session.' });
 });
 
