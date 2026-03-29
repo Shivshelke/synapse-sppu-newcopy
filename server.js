@@ -5,7 +5,6 @@ require('dotenv').config();
 const express   = require('express');
 const session   = require('express-session');
 const mongoose  = require('mongoose');
-const MongoStore = require('connect-mongo');
 const path      = require('path');
 
 const app  = express();
@@ -24,7 +23,6 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'synapse-sppu-secret-2024',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   cookie: { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
 }));
 
