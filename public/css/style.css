@@ -265,6 +265,17 @@ a { color: var(--accent); text-decoration: none; }
 }
 .btn-download:hover { background: var(--accent-hover); }
 
+.file-actions { display: flex; gap: .5rem; flex-shrink: 0; flex-wrap: wrap; }
+
+.btn-view {
+  padding: .4rem .9rem; background: transparent;
+  border: 1px solid var(--border-light); border-radius: 7px;
+  color: var(--text-secondary); font-family: inherit; font-size: .82rem;
+  cursor: pointer; transition: .2s; white-space: nowrap;
+  text-decoration: none; display: inline-block;
+}
+.btn-view:hover { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,.08); }
+
 /* ── ABOUT ── */
 .about-section { background: var(--bg); }
 .about-inner { display: grid; grid-template-columns: 1fr auto; gap: 4rem; align-items: center; }

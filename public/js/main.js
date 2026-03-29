@@ -186,7 +186,10 @@ function renderFileGrid(files, gridId) {
         <div class="file-meta">${escHtml(f.subject)} · ${formatSize(f.size)}</div>
         <div class="file-meta">${formatDate(f.uploadDate)}</div>
       </div>
-      <a class="btn-download" href="/api/download/${f._id}" download="${escHtml(f.originalName || f.subject + '.pdf')}" target="_blank">↓</a>
+      <div class="file-actions">
+        <a class="btn-view" href="/api/view/${f._id}" target="_blank" title="View PDF">👁 View</a>
+        <a class="btn-download" href="/api/download/${f._id}" download="${escHtml(f.originalName || f.subject + '.pdf')}" title="Download PDF">↓ Download</a>
+      </div>
     </div>
   `).join('');
 }

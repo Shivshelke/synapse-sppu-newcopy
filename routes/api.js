@@ -30,6 +30,27 @@ router.get('/download/:id', async (req, res) => {
   }
 });
 
+// GET /api/view/:id — view PDF inline in browser
+router.get('/view/:id', async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
+
+    const fileUrl = file.url;
+    const filename = (file.originalName || file.subject || 'file').replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+
+    const protocol = fileUrl.startsWith('https') ? https : http;
+    protocol.get(fileUrl, (proxyRes) => {
+      proxyRes.pipe(res);
+    }).on('error', () => res.status(500).json({ error: 'View failed.' }));
+  } catch(e) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
 // Hardcoded config (year/branch/subject taxonomy stored in memory)
 const CONFIG = {
   first:  { label: '1st Year', branches: ['FE'], subjects: ['Engineering Mathematics – I','Engineering Mathematics – II','Engineering Physics','Engineering Chemistry','Basic Electrical Engineering','Basic Electronics Engineering','Engineering Graphics','Engineering Mechanics','Fundamentals of Programming Languages','Programming and Problem Solving'] },
