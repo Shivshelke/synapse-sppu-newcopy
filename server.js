@@ -19,7 +19,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const MongoStore = require('connect-mongo');
+const MongoStore = require('connect-mongo').default || require('connect-mongo');
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'synapse-sppu-secret-2024',
