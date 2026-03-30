@@ -19,10 +19,16 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const MongoStore = require('connect-mongo');
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'synapse-sppu-secret-2024',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions'
+  }),
   cookie: { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
 }));
 
