@@ -9,22 +9,77 @@ const router     = express.Router();
 const File       = require('../models/File');
 const Feedback   = require('../models/Feedback');
 
+// Helper to proxy Cloudinary files with redirect support and header forwarding
+function proxySecure(url, res, filename, disposition = 'attachment') {
+  const protocol = url.startsWith('https') ? https : http;
+  const options = {
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Synapse-SPPU-Portal/1.0' }
+  };
+
+  protocol.get(url, options, (proxyRes) => {
+    // Handle redirects (e.g. 301, 302, 303, 307, 308)
+    if ([301, 302, 303, 307, 308].includes(proxyRes.statusCode) && proxyRes.headers.location) {
+      let redirectUrl = proxyRes.headers.location;
+      // Handle relative redirects
+      if (!redirectUrl.startsWith('http')) {
+        const origin = new URL(url).origin;
+        redirectUrl = origin + (redirectUrl.startsWith('/') ? '' : '/') + redirectUrl;
+      }
+      return proxySecure(redirectUrl, res, filename, disposition);
+    }
+
+    if (proxyRes.statusCode !== 200) {
+      console.error(`[Proxy] Error ${proxyRes.statusCode} for URL: ${url}`);
+      return res.status(proxyRes.statusCode || 500).send('File access error.');
+    }
+
+    // Set standard headers using Express helpers
+    if (disposition === 'attachment') {
+      res.attachment(filename);
+    } else {
+      res.set('Content-Disposition', `inline; filename="${filename}"`);
+    }
+
+    res.set('Content-Type', proxyRes.headers['content-type'] || 'application/pdf');
+    
+    // Forward Content-Length for better browser experience
+    if (proxyRes.headers['content-length']) {
+      res.set('Content-Length', proxyRes.headers['content-length']);
+    }
+
+    // Forward encoding so the browser decompresses it before saving
+    if (proxyRes.headers['content-encoding']) {
+      res.set('Content-Encoding', proxyRes.headers['content-encoding']);
+    }
+    if (proxyRes.headers['accept-ranges']) {
+      res.set('Accept-Ranges', proxyRes.headers['accept-ranges']);
+    }
+
+    proxyRes.pipe(res);
+
+    proxyRes.on('error', (err) => {
+      console.error('[Proxy] Stream Error:', err);
+      if (!res.headersSent) res.status(500).send('Stream error.');
+    });
+
+  }).on('error', (err) => {
+    console.error('[Proxy] Connection Error:', err);
+    if (!res.headersSent) res.status(500).send('Download failed.');
+  });
+}
+
 // GET /api/download/:id — proxy PDF with correct content-type
 router.get('/download/:id', async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
     if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
 
-    const fileUrl = file.url;
-    const filename = (file.originalName || file.subject || 'file').replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-    const protocol = fileUrl.startsWith('https') ? https : http;
-    protocol.get(fileUrl, (proxyRes) => {
-      proxyRes.pipe(res);
-    }).on('error', () => res.status(500).json({ error: 'Download failed.' }));
+    let baseName = (file.originalName || file.subject || 'file').trim();
+    if (baseName.toLowerCase().endsWith('.pdf')) {
+      baseName = baseName.slice(0, -4);
+    }
+    const filename = baseName.replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
+    proxySecure(file.url, res, filename, 'attachment');
   } catch(e) {
     res.status(500).json({ error: 'Server error.' });
   }
@@ -36,16 +91,12 @@ router.get('/view/:id', async (req, res) => {
     const file = await File.findById(req.params.id);
     if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
 
-    const fileUrl = file.url;
-    const filename = (file.originalName || file.subject || 'file').replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-
-    const protocol = fileUrl.startsWith('https') ? https : http;
-    protocol.get(fileUrl, (proxyRes) => {
-      proxyRes.pipe(res);
-    }).on('error', () => res.status(500).json({ error: 'View failed.' }));
+    let baseName = (file.originalName || file.subject || 'file').trim();
+    if (baseName.toLowerCase().endsWith('.pdf')) {
+      baseName = baseName.slice(0, -4);
+    }
+    const filename = baseName.replace(/[^a-zA-Z0-9._-]/g, '_') + '.pdf';
+    proxySecure(file.url, res, filename, 'inline');
   } catch(e) {
     res.status(500).json({ error: 'Server error.' });
   }

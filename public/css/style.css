@@ -559,5 +559,7 @@ a { color: var(--accent); text-decoration: none; }
 .modal-list li { background: var(--surface); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
 .modal-list li:hover { border-color: var(--accent); transform: translateX(5px); }
 .modal-list li span { font-weight: 500; color: var(--text); }
-.modal-list-btn { background: var(--accent); border: none; padding: 0.4rem 0.8rem; border-radius: 6px; color: #fff; cursor: pointer; transition: 0.2s; font-size: 0.8rem; }
+.modal-list-btn { background: var(--accent); border: none; padding: 0.4rem 0.8rem; border-radius: 6px; color: #fff; cursor: pointer; transition: 0.2s; font-size: 0.8rem; text-decoration: none; }
 .modal-list-btn:hover { background: var(--accent-hover); }
+.modal-list-btn.secondary { background: transparent; border: 1px solid var(--border-light); color: var(--text-secondary); }
+.modal-list-btn.secondary:hover { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,0.1); }

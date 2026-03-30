@@ -464,7 +464,10 @@ async function openPremiumModal(type) {
             <span style="display:block">${escHtml(f.subject)}</span>
             <small style="color:var(--muted)">${f.originalName} · ${formatSize(f.size)}</small>
           </div>
-          <a href="${escHtml(f.url)}" target="_blank" class="modal-list-btn" style="text-decoration:none;">View PDF</a>
+          <div style="display:flex; gap:8px;">
+            <a href="/api/view/${f._id}" target="_blank" class="modal-list-btn secondary" style="text-decoration:none;">👁 View</a>
+            <a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>
+          </div>
         </li>
       `).join('');
     }

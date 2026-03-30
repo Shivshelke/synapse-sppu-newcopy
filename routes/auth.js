@@ -11,10 +11,21 @@ const router  = express.Router();
 let adminPasswordHash = null;
 
 async function getAdminHash() {
-  if (!adminPasswordHash) {
-    const pwd = process.env.ADMIN_PASSWORD || 'Admin@Synapse2024';
-    adminPasswordHash = await bcrypt.hash(pwd, 10);
+  if (adminPasswordHash) return adminPasswordHash;
+
+  // 1. Check for a pre-computed hash in the env (prioritized)
+  if (process.env.ADMIN_PASSWORD_HASH) {
+    adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+  } 
+  // 2. Fallback to plain password from env
+  else if (process.env.ADMIN_PASSWORD) {
+    adminPasswordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+  } 
+  // 3. Fallback to hardcoded default
+  else {
+    adminPasswordHash = await bcrypt.hash('Admin@Synapse2024', 10);
   }
+  
   return adminPasswordHash;
 }
 
