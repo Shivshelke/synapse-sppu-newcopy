@@ -303,7 +303,7 @@ async function loadAdminFiles() {
               <td>${formatSize(f.size)}</td>
               <td>${formatDate(f.uploadDate)}</td>
               <td>
-                <button class="btn-del" onclick="openDeleteModal('${escHtml(f.id)}', '${escHtml(f.originalName)}')">Delete</button>
+                <button class="btn-del" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.originalName)}')">Delete</button>
               </td>
             </tr>
           `).join('')}
@@ -371,7 +371,7 @@ async function loadFeedback() {
               <div class="fb-name">${escHtml(f.name)}</div>
               <div class="fb-date">${formatDate(f.date)}</div>
             </div>
-            <button class="btn-del small" onclick="deleteFeedback('${f.id}')">Delete</button>
+            <button class="btn-del small" onclick="deleteFeedback('${f._id}')">Delete</button>
           </div>
           <div class="fb-msg">${escHtml(f.message)}</div>
         </div>
@@ -665,7 +665,7 @@ window.loadPremiumAdminFiles = async function() {
               <td>${escHtml(f.subject)}</td>
               <td>${formatSize(f.size)}</td>
               <td>
-                <button class="btn-del small" onclick="openDeleteModal('${escHtml(f.id)}', '${escHtml(f.originalName)}')">Delete</button>
+                <button class="btn-del small" onclick="openDeleteModal('${escHtml(f._id)}', '${escHtml(f.originalName)}')">Delete</button>
               </td>
             </tr>
             `;
