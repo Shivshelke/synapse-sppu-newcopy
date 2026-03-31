@@ -40,6 +40,11 @@
     <h1>SYNAPSE <span class="accent">PYQ</span></h1>
     <p class="hero-sub">Access, browse, and download previous year question papers for SPPU Engineering — organized by year, branch & subject.</p>
 
+    <div class="pattern-notice">
+      <span class="pattern-notice-icon">⚠️</span>
+      <span>All PYQs available on this portal are for the <strong>2024 SPPU Pattern</strong> only.</span>
+    </div>
+
     <div class="search-wrap" style="position:relative;">
       <input id="globalSearch" type="text" placeholder="Search papers, subjects, branches…" autocomplete="off" oninput="showSuggestions(this.value)" onfocus="showSuggestions(this.value)" onblur="setTimeout(()=>hideSuggestions(), 200)"/>
       <button onclick="doGlobalSearch()">Search</button>
@@ -70,7 +75,7 @@
 <section id="years" class="section">
   <div class="container">
     <div class="section-header">
-      <h2>Browse by Year</h2>
+      <h2>Browse by Year <span class="pattern-badge">2024 Pattern</span></h2>
       <p>Select your year to explore branches and subjects</p>
     </div>
     <div class="year-grid">

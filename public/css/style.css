@@ -124,6 +124,44 @@ a { color: var(--accent); text-decoration: none; }
   line-height: 1.7;
 }
 
+/* 2024 Pattern Notice */
+.pattern-notice {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  color: #fbbf24;
+  margin-bottom: 2rem;
+  max-width: 480px;
+  text-align: left;
+  line-height: 1.5;
+  animation: fadeInUp 0.5s ease 0.3s both;
+}
+.pattern-notice strong { color: #f59e0b; font-weight: 700; }
+.pattern-notice-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+.pattern-badge {
+  display: inline-block;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+  text-transform: uppercase;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* Search */
 .search-wrap {
   display: flex; gap: .5rem;
