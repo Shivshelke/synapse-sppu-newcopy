@@ -199,7 +199,6 @@ function renderFileGrid(files, gridId) {
         <div class="file-meta">${formatDate(f.uploadDate)}</div>
       </div>
       <div class="file-actions">
-        <a class="btn-view" href="/api/view/${f._id}" target="_blank" title="View PDF">👁 View</a>
         <a class="btn-download" href="/api/download/${f._id}" download="${escHtml(f.originalName || f.subject + '.pdf')}" title="Download PDF">↓ Download</a>
       </div>
     </div>
@@ -465,7 +464,6 @@ async function openPremiumModal(type) {
             <small style="color:var(--muted)">${f.originalName} · ${formatSize(f.size)}</small>
           </div>
           <div style="display:flex; gap:8px;">
-            <a href="/api/view/${f._id}" target="_blank" class="modal-list-btn secondary" style="text-decoration:none;">👁 View</a>
             <a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>
           </div>
         </li>
