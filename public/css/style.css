@@ -427,8 +427,8 @@ a { color: var(--accent); text-decoration: none; }
 
   /* File grid */
   .file-grid { grid-template-columns: 1fr; }
-  .file-card { padding: 1rem; }
-  .file-actions { flex-direction: row; width: 100%; justify-content: flex-end; }
+  .file-card { padding: 1rem; flex-wrap: wrap; }
+  .file-actions { flex-direction: row; width: 100%; justify-content: flex-end; margin-top: 0.5rem; }
   .btn-view, .btn-download { padding: .45rem .8rem; font-size: .8rem; }
 
   /* Tags / Browser */
