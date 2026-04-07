@@ -46,6 +46,12 @@ app.get('*', (req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 );
 
-app.listen(PORT, () => {
-  console.log(`\n🧠 SYNAPSE running at http://localhost:${PORT}`);
-});
+// ── Local dev server ──────────────────────────────────────────────────────────
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n🧠 SYNAPSE running at http://localhost:${PORT}`);
+  });
+}
+
+// ── Export for Vercel serverless ──────────────────────────────────────────────
+module.exports = app;
