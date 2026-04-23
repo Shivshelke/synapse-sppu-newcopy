@@ -130,17 +130,54 @@ router.get('/files', async (req, res) => {
   res.json(files);
 });
 
+// GET /api/preview/:id — Generate a blurred image preview of the first page
+router.get('/preview/:id', async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file || !file.url) return res.status(404).json({ error: 'File not found.' });
+
+    // Cloudinary transformation: Page 1, Blur 1000, Width 800, format JPG
+    // We insert transformations after "/upload/"
+    const baseUrl = file.url;
+    let previewUrl = baseUrl;
+
+    if (baseUrl.includes('/upload/')) {
+      // If it's a PDF, we can select page 1 and blur it
+      // Format: .../upload/pg_1,e_blur:1000,w_800,f_jpg/v123/public_id.pdf
+      previewUrl = baseUrl.replace('/upload/', '/upload/pg_1,e_blur:1000,w_800,f_jpg/');
+      
+      // Also ensure the extension is .jpg for the preview
+      if (previewUrl.toLowerCase().endsWith('.pdf')) {
+        previewUrl = previewUrl.slice(0, -4) + '.jpg';
+      }
+    }
+
+    res.json({ previewUrl });
+  } catch(e) {
+    res.status(500).json({ error: 'Server error.' });
+  }
+});
+
 // GET /api/premium-files
 router.get('/premium-files', async (req, res) => {
-  if (!req.session || (!req.session.isStudent && !req.session.isAdmin))
-    return res.status(401).json({ error: 'Please log in to view premium files.' });
-  if (req.session.isStudent && !req.session.isPremium)
-    return res.status(403).json({ error: 'Premium required.' });
-
   const { type } = req.query;
   const query = type ? { contentType: type } : { contentType: { $ne: 'regular' } };
   const files = await File.find(query).sort({ uploadDate: -1 });
-  res.json(files);
+
+  // If user is premium or admin, return everything.
+  // Otherwise, remove the 'url' field to prevent direct downloads.
+  const isAuthorized = req.session && (req.session.isAdmin || (req.session.isStudent && req.session.isPremium));
+
+  if (isAuthorized) {
+    return res.json(files);
+  } else {
+    const publicFiles = files.map(f => {
+      const obj = f.toObject();
+      delete obj.url; // Prevent download
+      return obj;
+    });
+    return res.json(publicFiles);
+  }
 });
 
 // GET /api/stats

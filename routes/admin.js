@@ -29,7 +29,7 @@ const storage = new CloudinaryStorage({
       : `synapse/${year}/${branch}`;
     return {
       folder,
-      resource_type: 'raw',
+      resource_type: 'image',
       format: 'pdf',
       public_id: `${subject}_${Date.now()}`
     };

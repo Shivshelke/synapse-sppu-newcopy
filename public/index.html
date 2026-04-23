@@ -268,6 +268,32 @@
     </div>
   </div>
 </div>
+
+<!-- ── Preview Overlay ── -->
+<div id="previewOverlay" class="modal-overlay preview-overlay" onclick="closePreview()">
+  <div class="preview-content" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closePreview()">&times;</button>
+    <div class="preview-header">
+      <h3>Premium Preview</h3>
+      <p>Viewing Page 1 of the document</p>
+    </div>
+    <div class="preview-body">
+      <div id="previewLoader" class="preview-loader">
+        <div class="spinner"></div>
+        <p>Generating preview...</p>
+      </div>
+      <div class="preview-img-container">
+        <img id="previewImage" src="" alt="Premium Preview" />
+        <div class="premium-lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <h4>Full PDF is Locked</h4>
+          <p>Get instant access to all solved papers and handwritten notes.</p>
+          <button class="btn-premium" onclick="buyPremium()">Unlock All for ₹99 ✨</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- ── CHAT WIDGET ── -->
 <div class="chat-widget" id="chatWidget">
   <div class="chat-header" onclick="toggleChat()">

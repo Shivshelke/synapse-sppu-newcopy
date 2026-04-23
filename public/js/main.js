@@ -457,26 +457,68 @@ async function openPremiumModal(type) {
     if (files.length === 0) {
       list.innerHTML = '<li><span style="color:var(--muted)">No files available yet.</span></li>';
     } else {
-      list.innerHTML = files.map(f => `
-        <li>
-          <div>
-            <span style="display:block">${escHtml(f.subject)}</span>
-            <small style="color:var(--muted)">${f.originalName} · ${formatSize(f.size)}</small>
-          </div>
-          <div style="display:flex; gap:8px;">
-            <a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>
-          </div>
-        </li>
-      `).join('');
+      list.innerHTML = files.map(f => {
+        const actionBtn = isPremiumUser 
+          ? `<a href="/api/download/${f._id}" class="modal-list-btn" style="text-decoration:none;">↓ Download</a>`
+          : `<button onclick="showPreview('${f._id}')" class="modal-list-btn" style="background:var(--accent); color:white;">🔍 Preview</button>`;
+
+        return `
+          <li>
+            <div>
+              <span style="display:block">${escHtml(f.subject)}</span>
+              <small style="color:var(--muted)">${escHtml(f.originalName)} · ${formatSize(f.size)}</small>
+            </div>
+            <div style="display:flex; gap:8px;">
+              ${actionBtn}
+            </div>
+          </li>
+        `;
+      }).join('');
     }
   } catch(e) {
     list.innerHTML = '<li><span style="color:var(--danger)">Failed to load.</span></li>';
   }
 }
 
+async function showPreview(fileId) {
+  const modal = document.getElementById('previewOverlay');
+  const img = document.getElementById('previewImage');
+  const loader = document.getElementById('previewLoader');
+  
+  if (!modal || !img || !loader) return;
+
+  modal.classList.add('show');
+  img.style.display = 'none';
+  loader.style.display = 'block';
+
+  try {
+    const res = await fetch(`/api/preview/${fileId}`);
+    const data = await res.json();
+    if (data.previewUrl) {
+      img.src = data.previewUrl;
+      img.onload = () => {
+        loader.style.display = 'none';
+        img.style.display = 'block';
+      };
+    } else {
+      alert('Could not load preview.');
+      closePreview();
+    }
+  } catch(e) {
+    alert('Error loading preview.');
+    closePreview();
+  }
+}
+
+function closePreview() {
+  const modal = document.getElementById('previewOverlay');
+  if (modal) modal.classList.remove('show');
+  const img = document.getElementById('previewImage');
+  if (img) img.src = ''; // Clear src
+}
+
 function closePremiumModal(e) {
-  // If e is provided, ensure we only close if the overlay background or close button was clicked
-  if (e && e.target && e.target !== e.currentTarget) return;
+  if (e && e.target && e.target !== e.currentTarget && !e.target.classList.contains('close-btn')) return;
   const modal = document.getElementById('premiumModal');
   if (modal) modal.classList.remove('show');
 }
