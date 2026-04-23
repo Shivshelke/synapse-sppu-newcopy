@@ -374,6 +374,19 @@
       to { opacity: 1; transform: translateX(0); }
     }
 
+    .forgot-link {
+      font-size: 0.8rem;
+      color: var(--primary);
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+
+    .forgot-link:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
     @media (max-width: 480px) {
       .auth-card {
         padding: 2.5rem 1.5rem;
@@ -406,6 +419,10 @@
           <h1>Create Account</h1>
           <p>Join the community of SPPU students</p>
         </div>
+        <div id="forgotHeader" style="display:none;">
+          <h1>Reset Password</h1>
+          <p>We'll send a recovery link to your email</p>
+        </div>
       </div>
 
       <!-- Login Section -->
@@ -426,7 +443,10 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Password</label>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <label style="margin-bottom:0;">Password</label>
+            <span class="forgot-link" onclick="toggleForm('forgot')">Forgot Password?</span>
+          </div>
           <div class="input-wrapper">
             <input type="password" id="lPassword" placeholder="••••••••" autocomplete="current-password"/>
           </div>
@@ -479,6 +499,23 @@
 
         <p class="toggle-text">Already a member? <span onclick="toggleForm('login')">Sign in instead</span></p>
       </div>
+
+      <!-- Forgot Password Section -->
+      <div id="forgotSection" style="display:none;" class="fade-section">
+        <div class="msg msg-error" id="forgotError"></div>
+        <div class="msg msg-success" id="forgotSuccess"></div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" id="fEmail" placeholder="Enter your registered email" autocomplete="email"/>
+          </div>
+        </div>
+        
+        <button class="btn-auth" id="forgotBtn" onclick="doForgotPassword()">Send Reset Link</button>
+        
+        <p class="toggle-text">Remembered? <span onclick="toggleForm('login')">Go back to login</span></p>
+      </div>
     </div>
   </div>
 
@@ -486,25 +523,33 @@
     function toggleForm(target) {
       const loginSec = document.getElementById('loginSection');
       const regSec = document.getElementById('registerSection');
+      const forgotSec = document.getElementById('forgotSection');
       const loginHeader = document.getElementById('loginHeader');
       const regHeader = document.getElementById('registerHeader');
+      const forgotHeader = document.getElementById('forgotHeader');
       
+      loginSec.style.display = 'none';
+      regSec.style.display = 'none';
+      forgotSec.style.display = 'none';
+      loginHeader.style.display = 'none';
+      regHeader.style.display = 'none';
+      forgotHeader.style.display = 'none';
+
       if (target === 'register') {
-        loginSec.style.display = 'none';
         regSec.style.display = 'block';
-        loginHeader.style.display = 'none';
         regHeader.style.display = 'block';
+      } else if (target === 'forgot') {
+        forgotSec.style.display = 'block';
+        forgotHeader.style.display = 'block';
       } else {
         loginSec.style.display = 'block';
-        regSec.style.display = 'none';
         loginHeader.style.display = 'block';
-        regHeader.style.display = 'none';
       }
       clearMsgs();
     }
 
     function clearMsgs() {
-      ['loginError', 'loginSuccess', 'regError', 'regSuccess'].forEach(id => {
+      ['loginError', 'loginSuccess', 'regError', 'regSuccess', 'forgotError', 'forgotSuccess'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.style.display = 'none';
       });
@@ -587,7 +632,8 @@
     document.addEventListener('keydown', e => { 
       if(e.key === 'Enter') {
         if(document.getElementById('loginSection').style.display !== 'none') doLogin();
-        else doRegister();
+        else if(document.getElementById('registerSection').style.display !== 'none') doRegister();
+        else doForgotPassword();
       }
     });
   </script>
@@ -595,7 +641,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDXwOD4wR6p6iF4UWbVNrh8YV3Yv6jnNkg",
@@ -613,8 +659,10 @@
 
     window.doGoogleLogin = async function() {
       const btn = document.getElementById('googleBtn');
-      btn.disabled = true;
-      btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Connecting...';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Connecting...';
+      }
 
       try {
         const result = await signInWithPopup(auth, provider);
@@ -632,14 +680,38 @@
           setTimeout(() => window.location.href = '/', 800);
         } else {
           showMsg('loginError', data.error || 'Google login failed.');
-          btn.disabled = false;
-          btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
+          }
         }
       } catch (error) {
         console.error(error);
         showMsg('loginError', 'Google login cancelled.');
-        btn.disabled = false;
-        btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
+        }
+      }
+    };
+
+    window.doForgotPassword = async function() {
+      const email = document.getElementById('fEmail').value.trim();
+      const btn = document.getElementById('forgotBtn');
+      
+      if(!email) { showMsg('forgotError', 'Please enter your email.'); return; }
+      
+      btn.disabled = true; btn.textContent = 'Sending...';
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMsg('forgotSuccess', 'Reset link sent! Please check your inbox.', 'success');
+        btn.textContent = 'Link Sent!';
+      } catch (error) {
+        console.error(error);
+        let msg = 'Failed to send reset link.';
+        if(error.code === 'auth/user-not-found') msg = 'User with this email not found.';
+        showMsg('forgotError', msg);
+        btn.disabled = false; btn.textContent = 'Send Reset Link';
       }
     };
   </script>
