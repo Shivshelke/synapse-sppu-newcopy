@@ -472,22 +472,27 @@ a { color: var(--accent); text-decoration: none; }
   .btn-view, .btn-download { width: 100%; text-align: center; }
 }
 
-[data-theme="light"] {
-  --bg:           #fafafa;
-  --surface:      #ffffff;
-  --surface2:     #f4f4f5;
-  --border:       #e4e4e7;
-  --border-light: #d4d4d8;
+/* ── LIGHT MODE OVERRIDES ── */
+:root[data-theme="light"] {
+  --bg:           #ffffff;
+  --surface:      #f8fafc;
+  --surface2:     #f1f5f9;
+  --border:       #e2e8f0;
+  --border-light: #cbd5e1;
   --accent:       #4f46e5;
   --accent-hover: #4338ca;
-  --accent-glow:  rgba(79, 70, 229, 0.15);
-  --text:         #18181b;
-  --text-secondary:#52525b;
-  --muted:        #71717a;
-  --card-hover:   #f4f4f5;
-  --nav-bg:       rgba(250,250,250,.85);
-  --mobile-nav-bg:rgba(255,255,255,.98);
+  --accent-glow:  rgba(79, 70, 229, 0.1);
+  --text:         #0f172a;
+  --text-secondary:#475569;
+  --muted:        #64748b;
+  --card-hover:   #f1f5f9;
+  --nav-bg:       rgba(255, 255, 255, 0.8);
+  --mobile-nav-bg:rgba(255, 255, 255, 0.98);
 }
+
+[data-theme="light"] .nav { background: var(--nav-bg) !important; }
+[data-theme="light"] .nav-links { background: var(--mobile-nav-bg); }
+[data-theme="light"] body { background: var(--bg); color: var(--text); }
 
 .theme-toggle { padding: 0.45rem !important; border-radius: 50% !important; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; cursor:pointer; }
 
