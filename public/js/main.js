@@ -3,6 +3,33 @@
  * Public portal — browse, search, download files.
  */
 
+// ── PWA Service Worker Registration ──────────────────────────────────────────
+let deferredPrompt;
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW Registered'))
+      .catch(err => console.log('SW Reg failed', err));
+  });
+}
+
+// Handle PWA Install Prompt
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const installBtn = document.getElementById('pwaInstallBtn');
+  if (installBtn) {
+    installBtn.style.display = 'block';
+    installBtn.addEventListener('click', async () => {
+      installBtn.style.display = 'none';
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to install prompt: ${outcome}`);
+      deferredPrompt = null;
+    });
+  }
+});
+
 // ── Mobile Menu ──────────────────────────────────────────────────────────────
 function toggleMobileMenu() {
   const nav = document.getElementById('navLinks');

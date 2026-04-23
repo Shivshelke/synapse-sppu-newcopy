@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SYNAPSE — SPPU PYQ Portal</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css"/>
@@ -25,6 +29,7 @@
     <div id="studentAuthNav" style="display:flex; align-items:center; gap:10px;">
       <a href="/student-login.html" class="btn-ghost" style="color:var(--accent)!important; border-color:var(--accent)">Login / Register</a>
     </div>
+    <button id="pwaInstallBtn" class="btn-ghost" style="display:none; color:var(--accent); border-color:var(--accent); font-weight:bold;">📲 Install App</button>
     <button onclick="toggleTheme()" class="btn-ghost theme-toggle" title="Toggle Theme"><span class="theme-icon">☀️</span></button>
   </div>
   <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
