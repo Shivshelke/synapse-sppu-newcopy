@@ -181,7 +181,7 @@ router.post('/chat', async (req, res) => {
   try {
     if (genAI) {
       // Use Gemini API
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
       const prompt = `You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ (Previous Year Questions) portal.
 Your tone is friendly, professional, and concise. Only answer questions related to the SYNAPSE portal, SPPU engineering, PYQs, studying, and student features. If they ask a general question, try to relate it to their studies. If they ask who you are, you are the SYNAPSE Bot powered by Gemini.
 The portal features: Free 2024 Pattern PYQs organized by Year (1st to 4th), Branch, and Subject. Premium access costs ₹99 and provides Solved PYQs, Handwritten Notes, and Practice Banks. Students can buy premium by logging in. Admin can upload papers.
