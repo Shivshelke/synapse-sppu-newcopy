@@ -5,257 +5,614 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Student Portal — SYNAPSE</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css?v=1.1"/>
   <script src="/js/theme.js"></script>
   <style>
-    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background: var(--bg); }
-    .auth-wrap { width:100%; max-width:440px; padding: 2rem; }
-    .auth-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2.5rem 2rem; position: relative; overflow: hidden; }
-    .auth-logo { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:.5rem; margin-bottom:1.5rem; }
-    .auth-card h1 { font-size:1.6rem; margin-bottom:.4rem; }
-    .auth-card p { color:var(--text-secondary); font-size:.9rem; margin-bottom:2rem; }
-    
-    .form-group { margin-bottom:1.2rem; }
-    .form-group label { display:block; font-size:.82rem; font-weight:500; margin-bottom:.4rem; color:var(--text-secondary); }
-    .form-group input { width:100%; padding:.75rem 1rem; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.95rem; font-family:inherit; outline:none; transition:.2s; box-sizing:border-box; }
-    .form-group input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
-    
-    .btn-auth { width:100%; padding:.8rem; background:var(--accent); color:#fff; border:none; border-radius:8px; font-size:1rem; font-family:inherit; font-weight:600; cursor:pointer; transition:.2s; margin-top:.5rem; }
-    .btn-auth:hover { background:var(--accent-hover); }
-    .btn-auth:disabled { opacity:.6; cursor:not-allowed; }
-    
-    .auth-error { background:rgba(239, 68, 68, 0.15); color:var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding:.75rem 1rem; border-radius:8px; font-size:.88rem; margin-bottom:1rem; display:none; }
-    .auth-success { background:rgba(34, 197, 94, 0.15); color:var(--success); border: 1px solid rgba(34, 197, 94, 0.3); padding:.75rem 1rem; border-radius:8px; font-size:.88rem; margin-bottom:1rem; display:none; }
-    
-    .toggle-link { display:block; text-align:center; margin-top:1.5rem; color:var(--muted); font-size:.88rem; cursor: pointer; }
-    .toggle-link span { color:var(--accent); font-weight:600; }
-    .toggle-link span:hover { text-decoration: underline; }
-    
-    .back-btn { position: absolute; top: 2.5rem; right: 2rem; color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: 0.2s; }
-    .back-btn:hover { color: var(--text); }
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
 
-    .auth-divider { display: flex; align-items: center; margin: 1.5rem 0; color: var(--muted); font-size: 0.8rem; }
-    .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
-    .auth-divider span { padding: 0 10px; }
+    [data-theme="light"] {
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(0, 0, 0, 0.05);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
 
-    .btn-google { width: 100%; padding: 0.75rem; background: #fff; color: #333; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; font-family: inherit; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .btn-google:hover { background: #f8f8f8; border-color: #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .btn-google img { width: 18px; height: 18px; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0f;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Animated Background Mesh */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #0a0a0f;
+      overflow: hidden;
+    }
+
+    .blob {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+      filter: blur(80px);
+      border-radius: 50%;
+      animation: move 25s infinite alternate;
+    }
+
+    .blob-1 { top: -10%; left: -10%; animation-duration: 20s; }
+    .blob-2 { bottom: -10%; right: -10%; background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%); animation-duration: 25s; }
+    .blob-3 { top: 40%; left: 30%; background: radial-gradient(circle, rgba(236, 72, 153, 0.1) 0%, transparent 70%); animation-duration: 30s; }
+
+    @keyframes move {
+      from { transform: translate(0, 0) scale(1); }
+      to { transform: translate(100px, 100px) scale(1.2); }
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .auth-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .auth-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .auth-logo span {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .auth-card h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .auth-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 1rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    [data-theme="light"] .input-wrapper input {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--primary);
+      background: rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .btn-auth {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+      box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-auth:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
+      filter: brightness(1.1);
+    }
+
+    .btn-auth:active {
+      transform: translateY(0);
+    }
+
+    .btn-auth:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 2rem 0;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--glass-border);
+    }
+
+    .divider span {
+      padding: 0 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .btn-google {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .btn-google:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--text-muted);
+    }
+
+    .btn-google img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .toggle-text {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .toggle-text span {
+      color: var(--primary);
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .toggle-text span:hover {
+      text-decoration: underline;
+    }
+
+    .back-to-home {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: 0.3s;
+    }
+
+    .back-to-home:hover {
+      color: var(--text-main);
+      transform: translateX(-5px);
+    }
+
+    .theme-toggle-btn {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      padding: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: 0.3s;
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Message styles */
+    .msg {
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    .msg-success {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Section Animations */
+    .fade-section {
+      animation: slideFade 0.5s ease;
+    }
+
+    @keyframes slideFade {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 2.5rem 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
-<div class="auth-wrap">
-  <div class="auth-card">
-    <a href="/" class="back-btn">✕</a>
-    <div class="auth-logo">⬡ SYNAPSE</div>
-    
-    <!-- Login Form -->
-    <div id="loginSection">
-      <h1>Student Login</h1>
-      <p>Log in to access your dashboard and premium content.</p>
-      
-      <div class="auth-error" id="loginError"></div>
-      <div class="auth-success" id="loginSuccess"></div>
 
-      <div class="form-group">
-        <label>Username</label>
-        <input type="text" id="lUsername" placeholder="Enter your username" autocomplete="username"/>
-      </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="lEmail" placeholder="your.email@example.com" autocomplete="email"/>
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="lPassword" placeholder="••••••••" autocomplete="current-password"/>
-      </div>
-      
-      <button class="btn-auth" id="loginBtn" onclick="doLogin()">Log In</button>
-      
-      <div class="auth-divider"><span>OR</span></div>
-      
-      <button class="btn-google" id="googleBtn" onclick="doGoogleLogin()">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-        Continue with Google
+  <div class="bg-animation">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <a href="/" class="back-to-home">← Back</a>
+      <button onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle Theme">
+        <span class="theme-icon">☀️</span>
       </button>
 
-      <div class="toggle-link" onclick="toggleForm('register')">Don't have an account? <span>Register</span></div>
-    </div>
-
-    <!-- Registration Form -->
-    <div id="registerSection" style="display:none;">
-      <h1>Create Account</h1>
-      <p>Join SYNAPSE to unlock free notes, pyqs and premium material.</p>
-      
-      <div class="auth-error" id="regError"></div>
-      <div class="auth-success" id="regSuccess"></div>
-
-      <div class="form-group">
-        <label>Choose a Username</label>
-        <input type="text" id="rUsername" placeholder="e.g. rahul123" autocomplete="off"/>
+      <div class="auth-header">
+        <div class="auth-logo">⬡ <span>SYNAPSE</span></div>
+        <div id="loginHeader">
+          <h1>Welcome Back</h1>
+          <p>Access your student dashboard and PYQs</p>
+        </div>
+        <div id="registerHeader" style="display:none;">
+          <h1>Create Account</h1>
+          <p>Join the community of SPPU students</p>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="rEmail" placeholder="your.email@example.com" autocomplete="off"/>
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="rPassword" placeholder="Minimum 6 characters" autocomplete="new-password"/>
-      </div>
-      
-      <button class="btn-auth" id="regBtn" onclick="doRegister()">Sign Up</button>
-      
-      <div class="toggle-link" onclick="toggleForm('login')">Already have an account? <span>Log In</span></div>
-    </div>
 
+      <!-- Login Section -->
+      <div id="loginSection" class="fade-section">
+        <div class="msg msg-error" id="loginError"></div>
+        <div class="msg msg-success" id="loginSuccess"></div>
+
+        <div class="form-group">
+          <label>Username</label>
+          <div class="input-wrapper">
+            <input type="text" id="lUsername" placeholder="your_username" autocomplete="username"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" id="lEmail" placeholder="name@email.com" autocomplete="email"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="lPassword" placeholder="••••••••" autocomplete="current-password"/>
+          </div>
+        </div>
+        
+        <button class="btn-auth" id="loginBtn" onclick="doLogin()">Sign In</button>
+        
+        <div class="divider"><span>OR</span></div>
+        
+        <button class="btn-google" id="googleBtn" onclick="doGoogleLogin()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+          Continue with Google
+        </button>
+
+        <p class="toggle-text">New here? <span onclick="toggleForm('register')">Create an account</span></p>
+      </div>
+
+      <!-- Register Section -->
+      <div id="registerSection" style="display:none;" class="fade-section">
+        <div class="msg msg-error" id="regError"></div>
+        <div class="msg msg-success" id="regSuccess"></div>
+
+        <div class="form-group">
+          <label>Choose Username</label>
+          <div class="input-wrapper">
+            <input type="text" id="rUsername" placeholder="e.g. topper_24" autocomplete="off"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" id="rEmail" placeholder="your@email.com" autocomplete="off"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="rPassword" placeholder="Min. 6 characters" autocomplete="new-password"/>
+          </div>
+        </div>
+        
+        <button class="btn-auth" id="regBtn" onclick="doRegister()">Create Account</button>
+        
+        <p class="toggle-text">Already a member? <span onclick="toggleForm('login')">Sign in instead</span></p>
+      </div>
     </div>
-    
   </div>
-</div>
 
-<script>
-  // Auth Form Toggle Logic
-  function toggleForm(target) {
-    document.getElementById('loginSection').style.display = target === 'login' ? 'block' : 'none';
-    document.getElementById('registerSection').style.display = target === 'register' ? 'block' : 'none';
-    clearMsgs();
-  }
+  <script>
+    function toggleForm(target) {
+      const loginSec = document.getElementById('loginSection');
+      const regSec = document.getElementById('registerSection');
+      const loginHeader = document.getElementById('loginHeader');
+      const regHeader = document.getElementById('registerHeader');
+      
+      if (target === 'register') {
+        loginSec.style.display = 'none';
+        regSec.style.display = 'block';
+        loginHeader.style.display = 'none';
+        regHeader.style.display = 'block';
+      } else {
+        loginSec.style.display = 'block';
+        regSec.style.display = 'none';
+        loginHeader.style.display = 'block';
+        regHeader.style.display = 'none';
+      }
+      clearMsgs();
+    }
 
-  function clearMsgs() {
-    ['loginError', 'loginSuccess', 'regError', 'regSuccess'].forEach(id => {
-      document.getElementById(id).style.display = 'none';
+    function clearMsgs() {
+      ['loginError', 'loginSuccess', 'regError', 'regSuccess'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.style.display = 'none';
+      });
+    }
+
+    function showMsg(id, msg, type = 'error') {
+      clearMsgs();
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.className = `msg msg-${type}`;
+    }
+
+    // Auth logic remains same
+    fetch('/student/status').then(r=>r.json()).then(d=>{
+      if(d.loggedIn) window.location.href='/';
     });
-  }
 
-  function showMsg(id, msg) {
-    clearMsgs();
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
+    async function doLogin() {
+      const btn = document.getElementById('loginBtn');
+      const username = document.getElementById('lUsername').value.trim();
+      const email = document.getElementById('lEmail').value.trim();
+      const password = document.getElementById('lPassword').value;
 
-  // Redirect if already logged in
-  fetch('/student/status').then(r=>r.json()).then(d=>{
-    if(d.loggedIn) window.location.href='/';
-  });
+      if(!username || !email || !password){ showMsg('loginError', 'All fields are required.'); return; }
 
-  async function doLogin() {
-    const btn = document.getElementById('loginBtn');
-    const username = document.getElementById('lUsername').value.trim();
-    const email = document.getElementById('lEmail').value.trim();
-    const password = document.getElementById('lPassword').value;
-
-    if(!username || !email || !password){ showMsg('loginError', 'Please fill all fields.'); return; }
-
-    btn.disabled=true; btn.textContent='Logging in…';
-    
-    try {
-      const res = await fetch('/student/login',{
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({username, email, password})
-      });
-      const data = await res.json();
-      if(data.success) {
-        showMsg('loginSuccess', 'Welcome back!');
-        setTimeout(() => window.location.href='/', 800);
-      } else {
-        showMsg('loginError', data.error || 'Login failed.');
-        btn.disabled=false; btn.textContent='Log In';
-      }
-    } catch(e) {
-      showMsg('loginError', 'Network error.');
-      btn.disabled=false; btn.textContent='Log In';
-    }
-  }
-
-  async function doRegister() {
-    const btn = document.getElementById('regBtn');
-    const username = document.getElementById('rUsername').value.trim();
-    const email = document.getElementById('rEmail').value.trim();
-    const password = document.getElementById('rPassword').value;
-
-    if(!username || !email || !password){ showMsg('regError', 'Please fill all fields.'); return; }
-    if(password.length < 6){ showMsg('regError', 'Password must be at least 6 characters.'); return; }
-
-    btn.disabled=true; btn.textContent='Creating account…';
-    
-    try {
-      const res = await fetch('/student/register',{
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({username, email, password})
-      });
-      const data = await res.json();
-      if(data.success) {
-        showMsg('regSuccess', 'Account created! Redirecting...');
-        setTimeout(() => window.location.href='/', 1000);
-      } else {
-        showMsg('regError', data.error || 'Registration failed.');
-        btn.disabled=false; btn.textContent='Sign Up';
-      }
-    } catch(e) {
-      showMsg('regError', 'Network error.');
-      btn.disabled=false; btn.textContent='Sign Up';
-    }
-  }
-
-  // Enter key support
-  document.getElementById('loginSection').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
-  document.getElementById('registerSection').addEventListener('keydown', e => { if(e.key === 'Enter') doRegister(); });
-</script>
-
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-
-  // Your actual Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDXwOD4wR6p6iF4UWbVNrh8YV3Yv6jnNkg",
-    authDomain: "synapse-ad058.firebaseapp.com",
-    projectId: "synapse-ad058",
-    storageBucket: "synapse-ad058.firebasestorage.app",
-    messagingSenderId: "821182368973",
-    appId: "1:821182368973:web:c3326de8f62eb8e3cfed84",
-    measurementId: "G-JRV2BB3X5Y"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-
-  window.doGoogleLogin = async function() {
-    const btn = document.getElementById('googleBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Connecting...';
-
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
+      btn.disabled = true; 
+      btn.innerHTML = '<span class="loading-spinner"></span> Signing in...';
       
-      // Send token to backend
-      const res = await fetch('/student/google-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken })
-      });
+      try {
+        const res = await fetch('/student/login',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({username, email, password})
+        });
+        const data = await res.json();
+        if(data.success) {
+          showMsg('loginSuccess', 'Success! Redirecting...', 'success');
+          setTimeout(() => window.location.href='/', 800);
+        } else {
+          showMsg('loginError', data.error || 'Invalid credentials.');
+          btn.disabled = false; btn.textContent = 'Sign In';
+        }
+      } catch(e) {
+        showMsg('loginError', 'Connection failed. Check your network.');
+        btn.disabled = false; btn.textContent = 'Sign In';
+      }
+    }
+
+    async function doRegister() {
+      const btn = document.getElementById('regBtn');
+      const username = document.getElementById('rUsername').value.trim();
+      const email = document.getElementById('rEmail').value.trim();
+      const password = document.getElementById('rPassword').value;
+
+      if(!username || !email || !password){ showMsg('regError', 'Please fill all fields.'); return; }
+      if(password.length < 6){ showMsg('regError', 'Password is too short (min 6 chars).'); return; }
+
+      btn.disabled = true; btn.textContent = 'Creating account...';
       
-      const data = await res.json();
-      if (data.success) {
-        showMsg('loginSuccess', 'Google login successful!');
-        setTimeout(() => window.location.href = '/', 800);
-      } else {
-        showMsg('loginError', data.error || 'Google login failed.');
+      try {
+        const res = await fetch('/student/register',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({username, email, password})
+        });
+        const data = await res.json();
+        if(data.success) {
+          showMsg('regSuccess', 'Welcome to Synapse! Redirecting...', 'success');
+          setTimeout(() => window.location.href='/', 1000);
+        } else {
+          showMsg('regError', data.error || 'Registration failed.');
+          btn.disabled = false; btn.textContent = 'Create Account';
+        }
+      } catch(e) {
+        showMsg('regError', 'Network error.');
+        btn.disabled = false; btn.textContent = 'Create Account';
+      }
+    }
+
+    document.addEventListener('keydown', e => { 
+      if(e.key === 'Enter') {
+        if(document.getElementById('loginSection').style.display !== 'none') doLogin();
+        else doRegister();
+      }
+    });
+  </script>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDXwOD4wR6p6iF4UWbVNrh8YV3Yv6jnNkg",
+      authDomain: "synapse-ad058.firebaseapp.com",
+      projectId: "synapse-ad058",
+      storageBucket: "synapse-ad058.firebasestorage.app",
+      messagingSenderId: "821182368973",
+      appId: "1:821182368973:web:c3326de8f62eb8e3cfed84",
+      measurementId: "G-JRV2BB3X5Y"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    window.doGoogleLogin = async function() {
+      const btn = document.getElementById('googleBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Connecting...';
+
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const idToken = await result.user.getIdToken();
+        
+        const res = await fetch('/student/google-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          showMsg('loginSuccess', 'Google login successful!', 'success');
+          setTimeout(() => window.location.href = '/', 800);
+        } else {
+          showMsg('loginError', data.error || 'Google login failed.');
+          btn.disabled = false;
+          btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
+        }
+      } catch (error) {
+        console.error(error);
+        showMsg('loginError', 'Google login cancelled.');
         btn.disabled = false;
         btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
       }
-    } catch (error) {
-      console.error(error);
-      showMsg('loginError', 'Google login cancelled or failed.');
-      btn.disabled = false;
-      btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
-    }
-  };
-</script>
+    };
+  </script>
 </body>
 </html>
