@@ -19,10 +19,11 @@
     }
 
     [data-theme="light"] {
-      --glass-bg: rgba(255, 255, 255, 0.7);
-      --glass-border: rgba(0, 0, 0, 0.05);
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(99, 102, 241, 0.15);
       --text-main: #0f172a;
-      --text-muted: #64748b;
+      --text-muted: #475569;
+      --input-bg: #f1f5f9;
     }
 
     body {
@@ -36,6 +37,11 @@
       background: #0a0a0f;
       overflow-x: hidden;
       position: relative;
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="light"] body {
+      background: #f8fafc;
     }
 
     /* Animated Background Mesh */
@@ -48,6 +54,11 @@
       z-index: -1;
       background: #0a0a0f;
       overflow: hidden;
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="light"] .bg-animation {
+      background: #f8fafc;
     }
 
     .blob {
@@ -58,6 +69,11 @@
       filter: blur(80px);
       border-radius: 50%;
       animation: move 25s infinite alternate;
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="light"] .blob {
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
     }
 
     .blob-1 { top: -10%; left: -10%; animation-duration: 20s; }
@@ -158,13 +174,19 @@
     }
 
     [data-theme="light"] .input-wrapper input {
-      background: rgba(255, 255, 255, 0.5);
+      background: var(--input-bg);
+      border-color: rgba(99, 102, 241, 0.1);
     }
 
     .input-wrapper input:focus {
       border-color: var(--primary);
       background: rgba(0, 0, 0, 0.3);
       box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    [data-theme="light"] .input-wrapper input:focus {
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.05);
     }
 
     .btn-auth {
