@@ -218,7 +218,7 @@ router.post('/chat', async (req, res) => {
   try {
     if (genAI) {
       // Use Gemini API
-      const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       const prompt = `You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ (Previous Year Questions) portal.
 Your tone is friendly, professional, and concise. Only answer questions related to the SYNAPSE portal, SPPU engineering, PYQs, studying, and student features. If they ask a general question, try to relate it to their studies. If they ask who you are, you are the SYNAPSE Bot powered by Gemini.
 The portal features: Free 2024 Pattern PYQs organized by Year (1st to 4th), Branch, and Subject. Premium access costs ₹99 and provides Solved PYQs, Handwritten Notes, and Practice Banks. Students can buy premium by logging in. Admin can upload papers.
@@ -227,7 +227,14 @@ Keep responses short, max 3-4 sentences.
 User asked: "${message}"`;
       
       const result = await model.generateContent(prompt);
-      const reply = result.response.text();
+      const response = await result.response;
+      const reply = response.text();
+
+      if (!reply) {
+        console.warn("Gemini returned an empty response.");
+        return res.json({ reply: "I'm sorry, I couldn't process that. Could you rephrase your question?" });
+      }
+
       return res.json({ reply });
     } else {
       // Fallback rule-based
@@ -245,8 +252,15 @@ User asked: "${message}"`;
       setTimeout(() => { res.json({ reply }); }, 600);
     }
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.json({ reply: "I'm sorry, I'm having trouble connecting to my AI brain right now. Try again later!" });
+    console.error("Gemini API Error:", error.message || error);
+    // If it's a safety block or rate limit, provide a more helpful message
+    let errorMsg = "I'm sorry, I'm having trouble connecting to my AI brain right now. Try again later!";
+    if (error.message && error.message.includes('RECITATION')) {
+      errorMsg = "I'm sorry, I cannot answer that specific question. Is there anything else about SPPU papers I can help with?";
+    } else if (error.message && error.message.includes('429')) {
+      errorMsg = "I'm a bit overwhelmed with questions right now. Please wait a moment and try again!";
+    }
+    res.json({ reply: errorMsg });
   }
 });
 
