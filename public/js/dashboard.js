@@ -5,7 +5,7 @@
 
 // ── Auth guard ────────────────────────────────────────────────────────────────
 (async () => {
-  const res  = await fetch('/auth/status');
+  const res = await fetch('/auth/status');
   const data = await res.json();
   if (!data.loggedIn) window.location.href = '/login.html';
 })();
@@ -31,14 +31,14 @@ async function loadConfig() {
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 async function loadStats() {
-  const res   = await fetch('/api/stats');
+  const res = await fetch('/api/stats');
   const stats = await res.json();
-  document.getElementById('dTotal').textContent  = stats.total;
-  document.getElementById('dFirst').textContent  = stats.byYear.first  || 0;
+  document.getElementById('dTotal').textContent = stats.total;
+  document.getElementById('dFirst').textContent = stats.byYear.first || 0;
   document.getElementById('dSecond').textContent = stats.byYear.second || 0;
-  document.getElementById('dThird').textContent  = stats.byYear.third  || 0;
+  document.getElementById('dThird').textContent = stats.byYear.third || 0;
   document.getElementById('dFourth').textContent = stats.byYear.fourth || 0;
-  if(document.getElementById('dStudents')) {
+  if (document.getElementById('dStudents')) {
     document.getElementById('dStudents').textContent = stats.totalStudents || 0;
   }
 }
@@ -75,14 +75,14 @@ function toggleSidebar() {
 
 // ── Upload form: year → branch ────────────────────────────────────────────────
 function onYearChange() {
-  const year   = document.getElementById('upYear').value;
+  const year = document.getElementById('upYear').value;
   const branch = document.getElementById('upBranch');
-  const subj   = document.getElementById('upSubject');
+  const subj = document.getElementById('upSubject');
 
   branch.innerHTML = '<option value="">— Select Branch —</option>';
-  subj.innerHTML   = '<option value="">— Select Subject —</option><option value="__custom__">+ Type custom subject…</option>';
-  branch.disabled  = true;
-  subj.disabled    = true;
+  subj.innerHTML = '<option value="">— Select Subject —</option><option value="__custom__">+ Type custom subject…</option>';
+  branch.disabled = true;
+  subj.disabled = true;
 
   if (!year || !CONFIG[year]) return;
 
@@ -96,11 +96,11 @@ function onYearChange() {
 }
 
 function onBranchChange() {
-  const year    = document.getElementById('upYear').value;
-  const subj    = document.getElementById('upSubject');
+  const year = document.getElementById('upYear').value;
+  const subj = document.getElementById('upSubject');
 
   subj.innerHTML = '<option value="">— Select Subject —</option><option value="__custom__">+ Type custom subject…</option>';
-  subj.disabled  = true;
+  subj.disabled = true;
 
   if (!year || !CONFIG[year]) return;
 
@@ -112,7 +112,7 @@ function onBranchChange() {
   });
   subj.disabled = false;
 
-  subj.addEventListener('change', function() {
+  subj.addEventListener('change', function () {
     document.getElementById('customSubjectGroup').style.display =
       this.value === '__custom__' ? 'block' : 'none';
   });
@@ -125,30 +125,30 @@ function onFileSelect(input) {
   if (file.size > 20 * 1024 * 1024) {
     showUploadAlert('File exceeds 20MB limit.', 'error'); return;
   }
-  document.getElementById('dropzone').style.display    = 'none';
+  document.getElementById('dropzone').style.display = 'none';
   document.getElementById('filePreview').style.display = 'flex';
-  document.getElementById('fileName').textContent      = `${file.name} (${formatSize(file.size)})`;
+  document.getElementById('fileName').textContent = `${file.name} (${formatSize(file.size)})`;
 }
 
 function clearFile() {
-  document.getElementById('pdfInput').value            = '';
-  document.getElementById('dropzone').style.display    = 'block';
+  document.getElementById('pdfInput').value = '';
+  document.getElementById('dropzone').style.display = 'block';
   document.getElementById('filePreview').style.display = 'none';
-  document.getElementById('upCustomFileName').value    = '';
+  document.getElementById('upCustomFileName').value = '';
 }
 
 function setupDragDrop() {
   const zone = document.getElementById('dropzone');
-  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
   zone.addEventListener('drop', e => {
     e.preventDefault(); zone.classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
     if (file) {
-      const input    = document.getElementById('pdfInput');
-      const dt       = new DataTransfer();
+      const input = document.getElementById('pdfInput');
+      const dt = new DataTransfer();
       dt.items.add(file);
-      input.files    = dt.files;
+      input.files = dt.files;
       onFileSelect(input);
     }
   });
@@ -156,20 +156,20 @@ function setupDragDrop() {
 
 // ── Upload ────────────────────────────────────────────────────────────────────
 async function doUpload() {
-  const year   = document.getElementById('upYear').value;
+  const year = document.getElementById('upYear').value;
   const branch = document.getElementById('upBranch').value;
   const subject = document.getElementById('upSubject').value;
   const customSubject = document.getElementById('upCustomSubject').value.trim();
   const customFileName = document.getElementById('upCustomFileName').value.trim();
-  const file   = document.getElementById('pdfInput').files[0];
+  const file = document.getElementById('pdfInput').files[0];
 
-  if (!year)    { showUploadAlert('Please select a year.',    'error'); return; }
-  if (!branch)  { showUploadAlert('Please select a branch.',  'error'); return; }
+  if (!year) { showUploadAlert('Please select a year.', 'error'); return; }
+  if (!branch) { showUploadAlert('Please select a branch.', 'error'); return; }
   if (!subject) { showUploadAlert('Please select a subject.', 'error'); return; }
   if (subject === '__custom__' && !customSubject) {
     showUploadAlert('Please enter a custom subject name.', 'error'); return;
   }
-  if (!file)    { showUploadAlert('Please select a PDF file.', 'error'); return; }
+  if (!file) { showUploadAlert('Please select a PDF file.', 'error'); return; }
 
   const btn = document.getElementById('uploadBtn');
   btn.disabled = true; btn.textContent = 'Uploading…';
@@ -178,36 +178,36 @@ async function doUpload() {
   const progressFill = document.getElementById('progressFill');
   const progressText = document.getElementById('progressText');
   progressWrap.style.display = 'block';
-  progressFill.style.width   = '0%';
+  progressFill.style.width = '0%';
 
   // Simulate progress for UX
   let prog = 0;
   const interval = setInterval(() => {
     prog = Math.min(prog + 8, 85);
     progressFill.style.width = `${prog}%`;
-    progressText.textContent  = `Uploading… ${prog}%`;
+    progressText.textContent = `Uploading… ${prog}%`;
   }, 150);
 
   const fd = new FormData();
-  fd.append('year',    year);
-  fd.append('branch',  branch);
+  fd.append('year', year);
+  fd.append('branch', branch);
   fd.append('subject', subject === '__custom__' ? customSubject : subject);
   if (subject === '__custom__') fd.append('customSubject', customSubject);
   if (customFileName) fd.append('customFileName', customFileName);
   fd.append('pdf', file);
 
   try {
-    const res  = await fetch('/admin/upload', { method: 'POST', body: fd });
+    const res = await fetch('/admin/upload', { method: 'POST', body: fd });
     const data = await res.json();
     clearInterval(interval);
 
     if (data.success) {
       progressFill.style.width = '100%';
-      progressText.textContent  = 'Upload complete!';
+      progressText.textContent = 'Upload complete!';
       showUploadAlert('Paper uploaded successfully! ✓', 'success');
       clearFile();
-      document.getElementById('upYear').value    = '';
-      document.getElementById('upBranch').value  = '';
+      document.getElementById('upYear').value = '';
+      document.getElementById('upBranch').value = '';
       document.getElementById('upSubject').value = '';
       document.getElementById('upCustomFileName').value = '';
       document.getElementById('upBranch').disabled = true;
@@ -218,7 +218,7 @@ async function doUpload() {
       showUploadAlert(data.error || 'Upload failed.', 'error');
       progressFill.style.width = '0%';
     }
-  } catch(e) {
+  } catch (e) {
     clearInterval(interval);
     showUploadAlert('Network error. Please try again.', 'error');
     progressFill.style.width = '0%';
@@ -230,17 +230,17 @@ async function doUpload() {
 
 function showUploadAlert(msg, type) {
   const el = document.getElementById('uploadAlert');
-  el.textContent  = msg;
-  el.className    = `alert ${type}`;
+  el.textContent = msg;
+  el.className = `alert ${type}`;
   el.style.display = 'block';
   if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
 // ── Recent files ──────────────────────────────────────────────────────────────
 async function loadRecentFiles() {
-  const res   = await fetch('/admin/files');
+  const res = await fetch('/admin/files');
   const files = await res.json();
-  const el    = document.getElementById('recentList');
+  const el = document.getElementById('recentList');
 
   if (!files.length) {
     el.innerHTML = '<div class="empty-state small">No files uploaded yet</div>';
@@ -260,15 +260,15 @@ async function loadRecentFiles() {
 
 // ── Manage files panel ────────────────────────────────────────────────────────
 async function loadAdminFiles() {
-  const year   = document.getElementById('filterYear').value;
+  const year = document.getElementById('filterYear').value;
   const search = document.getElementById('filterSearch').value;
   const params = new URLSearchParams();
-  if (year)   params.append('year', year);
+  if (year) params.append('year', year);
   if (search) params.append('search', search);
 
-  const res   = await fetch(`/admin/files?${params}`);
+  const res = await fetch(`/admin/files?${params}`);
   const files = await res.json();
-  const el    = document.getElementById('adminFileList');
+  const el = document.getElementById('adminFileList');
 
   if (!files.length) {
     el.innerHTML = `
@@ -317,8 +317,8 @@ async function loadAdminFiles() {
 function openDeleteModal(id, name) {
   deleteTargetId = id;
   document.getElementById('deleteModalText').textContent = `Delete "${name}"? This cannot be undone.`;
-  document.getElementById('deleteModal').style.display   = 'flex';
-  document.getElementById('confirmDeleteBtn').onclick     = doDelete;
+  document.getElementById('deleteModal').style.display = 'flex';
+  document.getElementById('confirmDeleteBtn').onclick = doDelete;
 }
 
 function closeDeleteModal() {
@@ -332,7 +332,7 @@ async function doDelete() {
   btn.disabled = true; btn.textContent = 'Deleting…';
 
   try {
-    const res  = await fetch(`/admin/files/${deleteTargetId}`, { method: 'DELETE' });
+    const res = await fetch(`/admin/files/${deleteTargetId}`, { method: 'DELETE' });
     const data = await res.json();
     closeDeleteModal();
     if (data.success) {
@@ -342,7 +342,7 @@ async function doDelete() {
     } else {
       alert(data.error || 'Delete failed.');
     }
-  } catch(e) {
+  } catch (e) {
     alert('Network error. Please try again.');
   } finally {
     btn.disabled = false; btn.textContent = 'Delete';
@@ -377,7 +377,7 @@ async function loadFeedback() {
         </div>
       `).join('')}
     </div>`;
-  } catch(e) {
+  } catch (e) {
     el.innerHTML = '<div class="empty-state">Failed to load feedback.</div>';
   }
 }
@@ -387,21 +387,21 @@ async function deleteFeedback(id) {
   try {
     const res = await fetch(`/admin/feedback/${id}`, { method: 'DELETE' });
     const data = await res.json();
-    if(data.success) {
+    if (data.success) {
       loadFeedback();
     } else {
       alert(data.error || 'Failed to delete');
     }
-  } catch(e) {
+  } catch (e) {
     alert('Network error');
   }
 }
 
 // ── Categories ────────────────────────────────────────────────────────────────
 async function loadCatStructure() {
-  const res  = await fetch('/api/config');
+  const res = await fetch('/api/config');
   const data = await res.json();
-  const el   = document.getElementById('catStructure');
+  const el = document.getElementById('catStructure');
 
   el.innerHTML = Object.entries(data).map(([key, yearData]) => `
     <div class="cat-year-block">
@@ -421,12 +421,12 @@ async function loadCatStructure() {
 }
 
 async function addSubject() {
-  const year    = document.getElementById('catYear').value;
+  const year = document.getElementById('catYear').value;
   const subject = document.getElementById('catSubject').value.trim();
   if (!subject) { showCatAlert('Enter a subject name.', 'error'); return; }
 
-  const res  = await fetch('/admin/config/subject', {
-    method:'POST', headers:{'Content-Type':'application/json'},
+  const res = await fetch('/admin/config/subject', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ year, subject })
   });
   const data = await res.json();
@@ -441,12 +441,12 @@ async function addSubject() {
 }
 
 async function addBranch() {
-  const year   = document.getElementById('catBYear').value;
+  const year = document.getElementById('catBYear').value;
   const branch = document.getElementById('catBranch').value.trim();
   if (!branch) { showCatBAlert('Enter a branch name.', 'error'); return; }
 
-  const res  = await fetch('/admin/config/branch', {
-    method:'POST', headers:{'Content-Type':'application/json'},
+  const res = await fetch('/admin/config/branch', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ year, branch })
   });
   const data = await res.json();
@@ -473,26 +473,26 @@ function showCatBAlert(msg, type) {
 
 // ── Password change ───────────────────────────────────────────────────────────
 async function doChangePassword() {
-  const cur  = document.getElementById('pwCurrent').value;
-  const nw   = document.getElementById('pwNew').value;
+  const cur = document.getElementById('pwCurrent').value;
+  const nw = document.getElementById('pwNew').value;
   const conf = document.getElementById('pwConfirm').value;
-  const el   = document.getElementById('pwAlert');
+  const el = document.getElementById('pwAlert');
 
   el.style.display = 'none';
 
   if (!cur || !nw || !conf) { showPwAlert('All fields are required.', 'error'); return; }
-  if (nw !== conf)           { showPwAlert('New passwords do not match.', 'error'); return; }
-  if (nw.length < 8)         { showPwAlert('Password must be at least 8 characters.', 'error'); return; }
+  if (nw !== conf) { showPwAlert('New passwords do not match.', 'error'); return; }
+  if (nw.length < 8) { showPwAlert('Password must be at least 8 characters.', 'error'); return; }
 
-  const res  = await fetch('/auth/change-password', {
-    method:'POST', headers:{'Content-Type':'application/json'},
+  const res = await fetch('/auth/change-password', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ currentPassword: cur, newPassword: nw })
   });
   const data = await res.json();
   if (data.success) {
     showPwAlert('Password updated successfully! ✓', 'success');
     document.getElementById('pwCurrent').value = '';
-    document.getElementById('pwNew').value     = '';
+    document.getElementById('pwNew').value = '';
     document.getElementById('pwConfirm').value = '';
   } else {
     showPwAlert(data.error || 'Failed to update password.', 'error');
@@ -520,11 +520,11 @@ function formatSize(bytes) {
 
 function formatDate(iso) {
   if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 // ── Close modal on background click ──────────────────────────────────────────
@@ -533,34 +533,34 @@ document.getElementById('deleteModal').addEventListener('click', e => {
 });
 
 // ── Premium Upload & Listing ──────────────────────────────────────────────────
-window.onPremiumFileSelect = function(input) {
+window.onPremiumFileSelect = function (input) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 20 * 1024 * 1024) {
     showPrmAlert('File exceeds 20MB limit.', 'error'); return;
   }
-  document.getElementById('prmDropzone').style.display    = 'none';
+  document.getElementById('prmDropzone').style.display = 'none';
   document.getElementById('prmFilePreview').style.display = 'flex';
   document.getElementById('prmFileNameDisplay').textContent = `${file.name} (${formatSize(file.size)})`;
 }
 
-window.clearPremiumFile = function() {
-  document.getElementById('prmPdfInput').value            = '';
-  document.getElementById('prmDropzone').style.display    = 'block';
+window.clearPremiumFile = function () {
+  document.getElementById('prmPdfInput').value = '';
+  document.getElementById('prmDropzone').style.display = 'block';
   document.getElementById('prmFilePreview').style.display = 'none';
-  document.getElementById('prmCustomName').value          = '';
+  document.getElementById('prmCustomName').value = '';
 }
 
-window.doPremiumUpload = async function() {
-  const type   = document.getElementById('prmType').value;
-  const year   = document.getElementById('prmYear').value;
-  const subject= document.getElementById('prmSubject').value.trim();
+window.doPremiumUpload = async function () {
+  const type = document.getElementById('prmType').value;
+  const year = document.getElementById('prmYear').value;
+  const subject = document.getElementById('prmSubject').value.trim();
   const custom = document.getElementById('prmCustomName').value.trim();
-  const file   = document.getElementById('prmPdfInput').files[0];
+  const file = document.getElementById('prmPdfInput').files[0];
 
-  if (!type)    { showPrmAlert('Please select a premium type.', 'error'); return; }
+  if (!type) { showPrmAlert('Please select a premium type.', 'error'); return; }
   if (!subject) { showPrmAlert('Please enter a subject name.', 'error'); return; }
-  if (!file)    { showPrmAlert('Please select a PDF file.', 'error'); return; }
+  if (!file) { showPrmAlert('Please select a PDF file.', 'error'); return; }
 
   const btn = document.getElementById('prmUploadBtn');
   btn.disabled = true; btn.textContent = 'Uploading…';
@@ -569,13 +569,13 @@ window.doPremiumUpload = async function() {
   const progressFill = document.getElementById('prmProgressFill');
   const progressText = document.getElementById('prmProgressText');
   progressWrap.style.display = 'block';
-  progressFill.style.width   = '0%';
+  progressFill.style.width = '0%';
 
   let prog = 0;
   const interval = setInterval(() => {
     prog = Math.min(prog + 8, 85);
     progressFill.style.width = `${prog}%`;
-    progressText.textContent  = `Uploading… ${prog}%`;
+    progressText.textContent = `Uploading… ${prog}%`;
   }, 150);
 
   const fd = new FormData();
@@ -586,25 +586,25 @@ window.doPremiumUpload = async function() {
   fd.append('pdf', file);
 
   try {
-    const res  = await fetch('/admin/upload', { method: 'POST', body: fd });
+    const res = await fetch('/admin/upload', { method: 'POST', body: fd });
     const data = await res.json();
     clearInterval(interval);
 
     if (data.success) {
       progressFill.style.width = '100%';
-      progressText.textContent  = 'Upload complete!';
+      progressText.textContent = 'Upload complete!';
       showPrmAlert('Premium content uploaded successfully! ✨', 'success');
       window.clearPremiumFile();
       document.getElementById('prmType').value = '';
       document.getElementById('prmYear').value = '';
       document.getElementById('prmSubject').value = '';
-      
+
       await window.loadPremiumAdminFiles();
     } else {
       showPrmAlert(data.error || 'Upload failed.', 'error');
       progressFill.style.width = '0%';
     }
-  } catch(e) {
+  } catch (e) {
     clearInterval(interval);
     showPrmAlert('Network error. Please try again.', 'error');
     progressFill.style.width = '0%';
@@ -620,15 +620,15 @@ function showPrmAlert(msg, type) {
   if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
-window.loadPremiumAdminFiles = async function() {
+window.loadPremiumAdminFiles = async function () {
   const el = document.getElementById('premiumAdminFileList');
   if (!el) return;
 
   try {
-    const p1 = fetch('/admin/files?contentType=solved-pyq').then(r=>r.json());
-    const p2 = fetch('/admin/files?contentType=notes').then(r=>r.json());
-    const p3 = fetch('/admin/files?contentType=practice').then(r=>r.json());
-    
+    const p1 = fetch('/admin/files?contentType=solved-pyq').then(r => r.json());
+    const p2 = fetch('/admin/files?contentType=notes').then(r => r.json());
+    const p3 = fetch('/admin/files?contentType=practice').then(r => r.json());
+
     // We get them separately so we can render them grouped if needed, or just combine
     const [d1, d2, d3] = await Promise.all([p1, p2, p3]);
     const files = [...d1, ...d2, ...d3];
@@ -653,12 +653,12 @@ window.loadPremiumAdminFiles = async function() {
         </thead>
         <tbody>
           ${files.map(f => {
-            let badge = '';
-            if (f.contentType === 'solved-pyq') badge = '<span class="badge" style="background:#f59e0b;color:#111">Solved PYQ</span>';
-            if (f.contentType === 'notes') badge = '<span class="badge" style="background:#8b5cf6;color:#fff">Notes</span>';
-            if (f.contentType === 'practice') badge = '<span class="badge" style="background:#ec4899;color:#fff">Practice</span>';
-            
-            return `
+      let badge = '';
+      if (f.contentType === 'solved-pyq') badge = '<span class="badge" style="background:#f59e0b;color:#111">Solved PYQ</span>';
+      if (f.contentType === 'notes') badge = '<span class="badge" style="background:#8b5cf6;color:#fff">Notes</span>';
+      if (f.contentType === 'practice') badge = '<span class="badge" style="background:#ec4899;color:#fff">Practice</span>';
+
+      return `
             <tr>
               <td>${badge}</td>
               <td><a href="${escHtml(f.url)}" target="_blank" style="color:var(--accent)">${escHtml(f.originalName)}</a></td>
@@ -669,16 +669,16 @@ window.loadPremiumAdminFiles = async function() {
               </td>
             </tr>
             `;
-          }).join('')}
+    }).join('')}
         </tbody>
       </table>
     </div>`;
-  } catch(e) {
+  } catch (e) {
     el.innerHTML = '<div class="empty-state">Error loading premium files.</div>';
   }
 }
 
-window.loadAdminStudents = async function() {
+window.loadAdminStudents = async function () {
   const el = document.getElementById('adminStudentList');
   if (!el) return;
 
@@ -703,14 +703,14 @@ window.loadAdminStudents = async function() {
         </thead>
         <tbody>
           ${students.map(s => {
-            return `
+      return `
             <tr>
               <td style="font-weight:600; color:var(--text)">@${escHtml(s.username)}</td>
               <td style="color:var(--muted)">${escHtml(s.email)}</td>
               <td>${formatDate(s.registeredAt)}</td>
             </tr>
             `;
-          }).join('')}
+    }).join('')}
         </tbody>
       </table>
     </div>`;

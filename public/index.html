@@ -268,6 +268,27 @@
     </div>
   </div>
 </div>
+<!-- ── CHAT WIDGET ── -->
+<div class="chat-widget" id="chatWidget">
+  <div class="chat-header" onclick="toggleChat()">
+    <div class="chat-header-title">
+      <span class="chat-icon">💬</span>
+      <span>SYNAPSE Bot</span>
+    </div>
+    <button class="chat-toggle-btn" id="chatToggleBtn">▲</button>
+  </div>
+  <div class="chat-body" id="chatBody" style="display:none;">
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-message bot-message">
+        Hi there! I'm the SYNAPSE assistant. How can I help you with SPPU PYQs today?
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="Type your question..." onkeypress="handleChatKeypress(event)" autocomplete="off" />
+      <button onclick="sendChatMessage()">Send</button>
+    </div>
+  </div>
+</div>
 
 <script src="/js/main.js?v=2"></script>
 </body>

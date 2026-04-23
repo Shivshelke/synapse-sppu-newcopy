@@ -487,3 +487,87 @@ document.addEventListener('keydown', (e) => {
 
 // Drag & drop visual on the whole body (just nice to have)
 document.addEventListener('DOMContentLoaded', init);
+
+// ── Chatbot Logic ─────────────────────────────────────────────────────────────
+function toggleChat() {
+  const chatWidget = document.getElementById('chatWidget');
+  const chatBody = document.getElementById('chatBody');
+  if (chatBody.style.display === 'none') {
+    chatBody.style.display = 'flex';
+    chatWidget.classList.add('open');
+    document.getElementById('chatInput').focus();
+  } else {
+    chatBody.style.display = 'none';
+    chatWidget.classList.remove('open');
+  }
+}
+
+function handleChatKeypress(event) {
+  if (event.key === 'Enter') {
+    sendChatMessage();
+  }
+}
+
+function addMessageToChat(text, type) {
+  const messagesContainer = document.getElementById('chatMessages');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `chat-message ${type}-message`;
+  msgDiv.textContent = text;
+  messagesContainer.appendChild(msgDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function showChatLoading() {
+  const messagesContainer = document.getElementById('chatMessages');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'chat-loading';
+  loadingDiv.id = 'chatLoading';
+  loadingDiv.innerHTML = '<div class="chat-dot"></div><div class="chat-dot"></div><div class="chat-dot"></div>';
+  messagesContainer.appendChild(loadingDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function hideChatLoading() {
+  const loadingDiv = document.getElementById('chatLoading');
+  if (loadingDiv) loadingDiv.remove();
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  // 1. Add User Message
+  addMessageToChat(text, 'user');
+  input.value = '';
+  input.disabled = true;
+  
+  // 2. Show Loading
+  showChatLoading();
+  
+  // 3. Send to Backend
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+    
+    const data = await res.json();
+    hideChatLoading();
+    
+    // 4. Add Bot Message
+    if (data.reply) {
+      addMessageToChat(data.reply, 'bot');
+    } else {
+      addMessageToChat('Sorry, I am having trouble connecting right now.', 'bot');
+    }
+  } catch(e) {
+    console.error('Chat error:', e);
+    hideChatLoading();
+    addMessageToChat('Network error. Please try again.', 'bot');
+  } finally {
+    input.disabled = false;
+    input.focus();
+  }
+}

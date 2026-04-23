@@ -5,6 +5,8 @@ const express    = require('express');
 const nodemailer = require('nodemailer');
 const https      = require('https');
 const http       = require('http');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const genAI      = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 const router     = express.Router();
 const File       = require('../models/File');
 const Feedback   = require('../models/Feedback');
@@ -170,6 +172,45 @@ router.post('/feedback', async (req, res) => {
     } catch(e) { console.error('Email error:', e); }
   }
   res.json({ success: true, message: 'Thanks for your feedback! 🚀' });
+});
+// POST /api/chat (Gemini AI Chatbot)
+router.post('/chat', async (req, res) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ error: 'Message is required.' });
+
+  try {
+    if (genAI) {
+      // Use Gemini API
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const prompt = `You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ (Previous Year Questions) portal.
+Your tone is friendly, professional, and concise. Only answer questions related to the SYNAPSE portal, SPPU engineering, PYQs, studying, and student features. If they ask a general question, try to relate it to their studies. If they ask who you are, you are the SYNAPSE Bot powered by Gemini.
+The portal features: Free 2024 Pattern PYQs organized by Year (1st to 4th), Branch, and Subject. Premium access costs ₹99 and provides Solved PYQs, Handwritten Notes, and Practice Banks. Students can buy premium by logging in. Admin can upload papers.
+Keep responses short, max 3-4 sentences.
+
+User asked: "${message}"`;
+      
+      const result = await model.generateContent(prompt);
+      const reply = result.response.text();
+      return res.json({ reply });
+    } else {
+      // Fallback rule-based
+      const msg = message.toLowerCase();
+      let reply = "I'm a simple bot right now. You can ask me about SPPU PYQs, Branches, or Premium content!";
+      if (msg.includes('hello') || msg.includes('hi ') || msg === 'hi' || msg === 'hey') {
+        reply = "Hello there! I am the SYNAPSE assistant. How can I help you today?";
+      } else if (msg.includes('pyq') || msg.includes('paper') || msg.includes('download')) {
+        reply = "You can browse and download PYQs by selecting your Year on the home page, then choosing your Branch and Subject. All our papers are for the 2024 Pattern.";
+      } else if (msg.includes('premium') || msg.includes('price')) {
+        reply = "Premium gives you access to Solved PYQs, Handwritten Notes, and Practice Banks for just ₹99. Just click on 'Premium PRO' in the navbar to login and buy!";
+      } else if (msg.includes('who are you') || msg.includes('name')) {
+        reply = "I'm the SYNAPSE Bot, created to help SPPU students navigate this PYQ portal.";
+      }
+      setTimeout(() => { res.json({ reply }); }, 600);
+    }
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    res.json({ reply: "I'm sorry, I'm having trouble connecting to my AI brain right now. Try again later!" });
+  }
 });
 
 module.exports = router;
