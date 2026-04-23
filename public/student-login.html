@@ -34,6 +34,14 @@
     
     .back-btn { position: absolute; top: 2.5rem; right: 2rem; color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: 0.2s; }
     .back-btn:hover { color: var(--text); }
+
+    .auth-divider { display: flex; align-items: center; margin: 1.5rem 0; color: var(--muted); font-size: 0.8rem; }
+    .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+    .auth-divider span { padding: 0 10px; }
+
+    .btn-google { width: 100%; padding: 0.75rem; background: #fff; color: #333; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; font-family: inherit; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .btn-google:hover { background: #f8f8f8; border-color: #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .btn-google img { width: 18px; height: 18px; }
   </style>
 </head>
 <body>
@@ -65,6 +73,13 @@
       
       <button class="btn-auth" id="loginBtn" onclick="doLogin()">Log In</button>
       
+      <div class="auth-divider"><span>OR</span></div>
+      
+      <button class="btn-google" id="googleBtn" onclick="doGoogleLogin()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continue with Google
+      </button>
+
       <div class="toggle-link" onclick="toggleForm('register')">Don't have an account? <span>Register</span></div>
     </div>
 
@@ -187,6 +202,60 @@
   // Enter key support
   document.getElementById('loginSection').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
   document.getElementById('registerSection').addEventListener('keydown', e => { if(e.key === 'Enter') doRegister(); });
+</script>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+
+  // Your actual Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyDXwOD4wR6p6iF4UWbVNrh8YV3Yv6jnNkg",
+    authDomain: "synapse-ad058.firebaseapp.com",
+    projectId: "synapse-ad058",
+    storageBucket: "synapse-ad058.firebasestorage.app",
+    messagingSenderId: "821182368973",
+    appId: "1:821182368973:web:c3326de8f62eb8e3cfed84",
+    measurementId: "G-JRV2BB3X5Y"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  window.doGoogleLogin = async function() {
+    const btn = document.getElementById('googleBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Connecting...';
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      
+      // Send token to backend
+      const res = await fetch('/student/google-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        showMsg('loginSuccess', 'Google login successful!');
+        setTimeout(() => window.location.href = '/', 800);
+      } else {
+        showMsg('loginError', data.error || 'Google login failed.');
+        btn.disabled = false;
+        btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
+      }
+    } catch (error) {
+      console.error(error);
+      showMsg('loginError', 'Google login cancelled or failed.');
+      btn.disabled = false;
+      btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Continue with Google';
+    }
+  };
 </script>
 </body>
 </html>
