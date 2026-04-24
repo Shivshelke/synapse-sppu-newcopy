@@ -218,6 +218,9 @@ router.post('/chat', async (req, res) => {
   // Rule-based fallback function
   const getFallbackReply = (msg) => {
     const lowMsg = msg.toLowerCase();
+    if (lowMsg.includes('shivam') || lowMsg.includes('shelke')) {
+      return "Shivam Shelke is the developer and creator of SYNAPSE! He built this platform to help SPPU students like you. 🚀";
+    }
     if (lowMsg.includes('hello') || lowMsg.includes('hi ') || lowMsg === 'hi' || lowMsg === 'hey') {
       return "Hello there! I am the SYNAPSE assistant. How can I help you today?";
     } else if (lowMsg.includes('pyq') || lowMsg.includes('paper') || lowMsg.includes('download')) {
@@ -235,7 +238,7 @@ router.post('/chat', async (req, res) => {
       // 1. Create model with system instruction
       const model = genAI.getGenerativeModel({ 
         model: "gemini-1.5-flash",
-        systemInstruction: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences."
+        systemInstruction: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your creator is Shivam Shelke, a visionary developer. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences."
       });
 
       // 2. Wrap generateContent in a timeout to avoid Vercel hanging
