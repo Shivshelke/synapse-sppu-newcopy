@@ -215,52 +215,57 @@ router.post('/chat', async (req, res) => {
   const { message } = req.body;
   if (!message) return res.status(400).json({ error: 'Message is required.' });
 
+  // Rule-based fallback function
+  const getFallbackReply = (msg) => {
+    const lowMsg = msg.toLowerCase();
+    if (lowMsg.includes('hello') || lowMsg.includes('hi ') || lowMsg === 'hi' || lowMsg === 'hey') {
+      return "Hello there! I am the SYNAPSE assistant. How can I help you today?";
+    } else if (lowMsg.includes('pyq') || lowMsg.includes('paper') || lowMsg.includes('download')) {
+      return "You can browse and download PYQs by selecting your Year on the home page, then choosing your Branch and Subject. All our papers are for the 2024 Pattern.";
+    } else if (lowMsg.includes('premium') || lowMsg.includes('price')) {
+      return "Premium gives you access to Solved PYQs, Handwritten Notes, and Practice Banks for just ₹99. Just click on 'Premium PRO' in the navbar to login and buy!";
+    } else if (lowMsg.includes('who are you') || lowMsg.includes('name')) {
+      return "I'm the SYNAPSE Bot, created to help SPPU students navigate this PYQ portal.";
+    }
+    return "I'm a simple bot right now. You can ask me about SPPU PYQs, Branches, or Premium content!";
+  };
+
   try {
     if (genAI) {
-      // Use Gemini API
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = `You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ (Previous Year Questions) portal.
-Your tone is friendly, professional, and concise. Only answer questions related to the SYNAPSE portal, SPPU engineering, PYQs, studying, and student features. If they ask a general question, try to relate it to their studies. If they ask who you are, you are the SYNAPSE Bot powered by Gemini.
-The portal features: Free 2024 Pattern PYQs organized by Year (1st to 4th), Branch, and Subject. Premium access costs ₹99 and provides Solved PYQs, Handwritten Notes, and Practice Banks. Students can buy premium by logging in. Admin can upload papers.
-Keep responses short, max 3-4 sentences.
+      // 1. Create model with system instruction
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        systemInstruction: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences."
+      });
 
-User asked: "${message}"`;
-      
-      const result = await model.generateContent(prompt);
+      // 2. Wrap generateContent in a timeout to avoid Vercel hanging
+      const chatPromise = model.generateContent(`User asked: "${message}"`);
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 8000));
+
+      const result = await Promise.race([chatPromise, timeoutPromise]);
       const response = await result.response;
       const reply = response.text();
 
-      if (!reply) {
-        console.warn("Gemini returned an empty response.");
-        return res.json({ reply: "I'm sorry, I couldn't process that. Could you rephrase your question?" });
-      }
-
-      return res.json({ reply });
+      if (reply) return res.json({ reply });
+      throw new Error('EMPTY_REPLY');
     } else {
-      // Fallback rule-based
-      const msg = message.toLowerCase();
-      let reply = "I'm a simple bot right now. You can ask me about SPPU PYQs, Branches, or Premium content!";
-      if (msg.includes('hello') || msg.includes('hi ') || msg === 'hi' || msg === 'hey') {
-        reply = "Hello there! I am the SYNAPSE assistant. How can I help you today?";
-      } else if (msg.includes('pyq') || msg.includes('paper') || msg.includes('download')) {
-        reply = "You can browse and download PYQs by selecting your Year on the home page, then choosing your Branch and Subject. All our papers are for the 2024 Pattern.";
-      } else if (msg.includes('premium') || msg.includes('price')) {
-        reply = "Premium gives you access to Solved PYQs, Handwritten Notes, and Practice Banks for just ₹99. Just click on 'Premium PRO' in the navbar to login and buy!";
-      } else if (msg.includes('who are you') || msg.includes('name')) {
-        reply = "I'm the SYNAPSE Bot, created to help SPPU students navigate this PYQ portal.";
-      }
-      setTimeout(() => { res.json({ reply }); }, 600);
+      throw new Error('NO_GEN_AI');
     }
   } catch (error) {
-    console.error("Gemini API Error:", error.message || error);
-    // If it's a safety block or rate limit, provide a more helpful message
-    let errorMsg = "I'm sorry, I'm having trouble connecting to my AI brain right now. Try again later!";
+    console.error("Chat Error:", error.message || error);
+    
+    // Check for specific error types
+    let reply = getFallbackReply(message);
+    
     if (error.message && error.message.includes('RECITATION')) {
-      errorMsg = "I'm sorry, I cannot answer that specific question. Is there anything else about SPPU papers I can help with?";
+      reply = "I'm sorry, I cannot answer that specific question for safety reasons. Is there anything else about SPPU papers I can help with?";
     } else if (error.message && error.message.includes('429')) {
-      errorMsg = "I'm a bit overwhelmed with questions right now. Please wait a moment and try again!";
+      reply = "I'm getting a lot of questions right now! " + reply;
+    } else if (error.message === 'TIMEOUT') {
+      reply = "My AI brain is a bit slow right now, but here's what I know: " + reply;
     }
-    res.json({ reply: errorMsg });
+    
+    res.json({ reply });
   }
 });
 
