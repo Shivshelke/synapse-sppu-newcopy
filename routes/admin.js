@@ -120,4 +120,41 @@ router.post('/config/subject', (req, res) => res.json({ success: true }));
 router.delete('/config/subject', (req, res) => res.json({ success: true }));
 router.post('/config/branch', (req, res) => res.json({ success: true }));
 
+// GET /admin/premium-requests
+router.get('/premium-requests', async (req, res) => {
+  const requests = await Student.find({ premiumStatus: 'pending' }, '-password').sort({ registeredAt: -1 });
+  res.json(requests);
+});
+
+// POST /admin/approve-premium/:id
+router.post('/approve-premium/:id', async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
+
+    student.isPremium = true;
+    student.premiumStatus = 'active';
+    await student.save();
+
+    res.json({ success: true, message: 'Student approved for Premium access!' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to approve student.' });
+  }
+});
+
+// POST /admin/reject-premium/:id
+router.post('/reject-premium/:id', async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
+
+    student.premiumStatus = 'none';
+    await student.save();
+
+    res.json({ success: true, message: 'Student request rejected.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to reject student.' });
+  }
+});
+
 module.exports = router;

@@ -106,9 +106,21 @@ router.post('/logout', (req, res) => {
 });
 
 // GET /student/status
-router.get('/status', (req, res) => {
-  if (req.session && req.session.isStudent)
-    return res.json({ loggedIn: true, username: req.session.studentUser, isPremium: req.session.isPremium || false });
+router.get('/status', async (req, res) => {
+  if (req.session && req.session.isStudent) {
+    const student = await Student.findOne({ username: req.session.studentUser });
+    if (!student) return res.json({ loggedIn: false });
+    
+    // Sync session
+    req.session.isPremium = student.isPremium;
+    
+    return res.json({ 
+      loggedIn: true, 
+      username: student.username, 
+      isPremium: student.isPremium,
+      premiumStatus: student.premiumStatus || 'none'
+    });
+  }
   res.json({ loggedIn: false });
 });
 
@@ -117,9 +129,11 @@ router.post('/buy-premium', async (req, res) => {
   if (!req.session || !req.session.isStudent)
     return res.status(401).json({ error: 'Unauthorized.' });
 
-  await Student.updateOne({ username: req.session.studentUser }, { isPremium: true });
-  req.session.isPremium = true;
-  res.json({ success: true, message: 'Premium unlocked!' });
+  await Student.updateOne(
+    { username: req.session.studentUser }, 
+    { premiumStatus: 'pending' }
+  );
+  res.json({ success: true, message: 'Your request for Premium access has been sent to the Admin! ✨' });
 });
 
 module.exports = router;

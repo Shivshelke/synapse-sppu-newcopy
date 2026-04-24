@@ -36,6 +36,9 @@
     <a href="#" class="nav-item" data-panel="feedback">
       <span class="nav-icon">💬</span> Feedback
     </a>
+    <a href="#" class="nav-item" data-panel="requests">
+      <span class="nav-icon">🔔</span> Premium Requests
+    </a>
     <a href="#" class="nav-item" data-panel="password">
       <span class="nav-icon">🔑</span> Change Password
     </a>
@@ -317,6 +320,19 @@
     <div class="table-card">
       <div id="adminStudentList">
         <div class="empty-state">Loading students…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PANEL: REQUESTS ══ -->
+  <section class="panel" id="panel-requests">
+    <div class="panel-header">
+      <h2>Pending Premium Requests</h2>
+      <button class="btn-ghost" onclick="window.loadPremiumRequests()">↻ Refresh</button>
+    </div>
+    <div class="table-card">
+      <div id="premiumRequestList">
+        <div class="empty-state">Loading requests…</div>
       </div>
     </div>
   </section>

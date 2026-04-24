@@ -80,6 +80,7 @@ async function init() {
       if (welcome) welcome.textContent = `Welcome to Premium, ${escHtml(authData.username)}!`;
       isLoggedIn = true;
       isPremiumUser = authData.isPremium || false;
+      window.userPremiumStatus = authData.premiumStatus || 'none';
       togglePremiumState();
     } else {
       isLoggedIn = false;
@@ -404,7 +405,7 @@ window.buyPremium = async function() {
     const res = await fetch('/student/buy-premium', { method: 'POST' });
     const data = await res.json();
     if(data.success) {
-      alert('Payment Successful! Premium Unlocked. ✨');
+      alert(data.message);
       init();
     } else {
       alert(data.error || 'Failed to buy premium.');
@@ -428,6 +429,7 @@ function togglePremiumState() {
   const loggedOut = document.getElementById('loggedOutState');
   const free = document.getElementById('freeState');
   const unlocked = document.getElementById('unlockedState');
+  const buyBtn = document.getElementById('buyPremiumBtn');
   
   if (!loggedOut || !free || !unlocked) return;
   
@@ -439,8 +441,24 @@ function togglePremiumState() {
     let target;
     if (!isLoggedIn) {
       target = loggedOut;
+    } else if (window.userPremiumStatus === 'pending') {
+      target = free;
+      if (buyBtn) {
+        buyBtn.innerHTML = '<span style="display:flex; align-items:center; gap:8px;">⏳ Request Pending Approval...</span>';
+        buyBtn.disabled = true;
+        buyBtn.style.opacity = '0.7';
+        buyBtn.style.cursor = 'not-allowed';
+        buyBtn.style.background = 'var(--muted)';
+      }
     } else if (!isPremiumUser) {
       target = free;
+      if (buyBtn) {
+        buyBtn.textContent = 'Buy Premium Now ✨';
+        buyBtn.disabled = false;
+        buyBtn.style.opacity = '1';
+        buyBtn.style.cursor = 'pointer';
+        buyBtn.style.background = ''; // reset to default
+      }
     } else {
       target = unlocked;
     }

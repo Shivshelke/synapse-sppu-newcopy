@@ -59,6 +59,7 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
     // Refresh file list on panel switch
     if (panelId === 'files') loadAdminFiles();
     if (panelId === 'students') window.loadAdminStudents();
+    if (panelId === 'requests') window.loadPremiumRequests();
     if (panelId === 'premium') window.loadPremiumAdminFiles();
     if (panelId === 'categories') loadCatStructure();
     if (panelId === 'feedback') loadFeedback();
@@ -716,6 +717,85 @@ window.loadAdminStudents = async function () {
     </div>`;
   } catch (e) {
     el.innerHTML = '<div class="empty-state">Error loading students list.</div>';
+  }
+}
+
+window.loadPremiumRequests = async function () {
+  const el = document.getElementById('premiumRequestList');
+  if (!el) return;
+
+  try {
+    const res = await fetch('/admin/premium-requests');
+    const requests = await res.json();
+
+    if (!requests || !requests.length) {
+      el.innerHTML = '<div class="empty-state">No pending premium requests.</div>';
+      return;
+    }
+
+    el.innerHTML = `
+    <div class="file-table-wrap">
+      <table class="file-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Requested Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${requests.map(r => `
+            <tr>
+              <td style="font-weight:600; color:var(--text)">@${escHtml(r.username)}</td>
+              <td style="color:var(--muted)">${escHtml(r.email)}</td>
+              <td>${formatDate(r.registeredAt)}</td>
+              <td>
+                <div style="display:flex; gap:0.5rem;">
+                  <button class="btn-primary small" onclick="window.approvePremium('${r._id}')" style="background:#10b981; border-color:#10b981; padding: 4px 10px;">Approve</button>
+                  <button class="btn-del small" onclick="window.rejectPremium('${r._id}')" style="padding: 4px 10px;">Reject</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  } catch (e) {
+    el.innerHTML = '<div class="empty-state">Error loading requests.</div>';
+  }
+}
+
+window.approvePremium = async function (id) {
+  if (!confirm('Approve this student for Premium access?')) return;
+  try {
+    const res = await fetch(`/admin/approve-premium/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      alert(data.message);
+      window.loadPremiumRequests();
+      loadStats();
+    } else {
+      alert(data.error || 'Failed to approve');
+    }
+  } catch (e) {
+    alert('Network error');
+  }
+}
+
+window.rejectPremium = async function (id) {
+  if (!confirm('Reject this premium request?')) return;
+  try {
+    const res = await fetch(`/admin/reject-premium/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      alert(data.message);
+      window.loadPremiumRequests();
+    } else {
+      alert(data.error || 'Failed to reject');
+    }
+  } catch (e) {
+    alert('Network error');
   }
 }
 
