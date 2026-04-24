@@ -182,14 +182,20 @@ router.get('/premium-files', async (req, res) => {
 
 // GET /api/stats
 router.get('/stats', async (req, res) => {
-  const [total, totalStudents, byYearRaw] = await Promise.all([
-    File.countDocuments(),
-    require('../models/Student').countDocuments(),
-    File.aggregate([{ $group: { _id: '$year', count: { $sum: 1 } } }])
-  ]);
-  const byYear = {};
-  byYearRaw.forEach(r => { byYear[r._id] = r.count; });
-  res.json({ total, totalStudents, byYear });
+  try {
+    const [total, totalStudents, pendingPremium, totalFeedback, byYearRaw] = await Promise.all([
+      File.countDocuments(),
+      require('../models/Student').countDocuments(),
+      require('../models/Student').countDocuments({ premiumStatus: 'pending' }),
+      Feedback.countDocuments(),
+      File.aggregate([{ $group: { _id: '$year', count: { $sum: 1 } } }])
+    ]);
+    const byYear = {};
+    byYearRaw.forEach(r => { byYear[r._id] = r.count; });
+    res.json({ total, totalStudents, pendingPremium, totalFeedback, byYear });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch stats.' });
+  }
 });
 
 // POST /api/feedback

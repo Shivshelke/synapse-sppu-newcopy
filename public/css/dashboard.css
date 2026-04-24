@@ -59,6 +59,17 @@ a { text-decoration:none; }
   padding: .6rem .9rem; border-radius: 10px;
   color: var(--text-secondary); font-size: .88rem;
   transition: .2s; cursor:pointer;
+  position: relative;
+}
+.nav-badge {
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 800;
+  margin-left: auto;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
 }
 .nav-item:hover { background: var(--surface2); color: var(--text); }
 .nav-item.active { background: rgba(99,102,241,.15); color: var(--accent); font-weight:500; }

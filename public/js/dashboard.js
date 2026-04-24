@@ -31,15 +31,37 @@ async function loadConfig() {
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 async function loadStats() {
-  const res = await fetch('/api/stats');
-  const stats = await res.json();
-  document.getElementById('dTotal').textContent = stats.total;
-  document.getElementById('dFirst').textContent = stats.byYear.first || 0;
-  document.getElementById('dSecond').textContent = stats.byYear.second || 0;
-  document.getElementById('dThird').textContent = stats.byYear.third || 0;
-  document.getElementById('dFourth').textContent = stats.byYear.fourth || 0;
-  if (document.getElementById('dStudents')) {
-    document.getElementById('dStudents').textContent = stats.totalStudents || 0;
+  try {
+    const res = await fetch('/api/stats');
+    const stats = await res.json();
+    document.getElementById('dTotal').textContent = stats.total;
+    document.getElementById('dFirst').textContent = stats.byYear.first || 0;
+    document.getElementById('dSecond').textContent = stats.byYear.second || 0;
+    document.getElementById('dThird').textContent = stats.byYear.third || 0;
+    document.getElementById('dFourth').textContent = stats.byYear.fourth || 0;
+    if (document.getElementById('dStudents')) {
+      document.getElementById('dStudents').textContent = stats.totalStudents || 0;
+    }
+
+    // Sidebar Badges
+    const bFeedback = document.getElementById('badge-feedback');
+    const bRequests = document.getElementById('badge-requests');
+
+    if (stats.totalFeedback > 0) {
+      bFeedback.textContent = stats.totalFeedback;
+      bFeedback.style.display = 'inline-block';
+    } else {
+      bFeedback.style.display = 'none';
+    }
+
+    if (stats.pendingPremium > 0) {
+      bRequests.textContent = stats.pendingPremium;
+      bRequests.style.display = 'inline-block';
+    } else {
+      bRequests.style.display = 'none';
+    }
+  } catch (e) {
+    console.error('Stats load error:', e);
   }
 }
 
