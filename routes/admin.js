@@ -120,10 +120,24 @@ router.post('/config/subject', (req, res) => res.json({ success: true }));
 router.delete('/config/subject', (req, res) => res.json({ success: true }));
 router.post('/config/branch', (req, res) => res.json({ success: true }));
 
-// GET /admin/premium-requests
+// GET /admin/premium-requests?all=true (all pending) or default (unseen only)
 router.get('/premium-requests', async (req, res) => {
-  const requests = await Student.find({ premiumStatus: 'pending' }, '-password').sort({ registeredAt: -1 });
+  const showAll = req.query.all === 'true';
+  const query = showAll
+    ? { premiumStatus: 'pending' }
+    : { premiumStatus: 'pending', requestSeen: false };
+  const requests = await Student.find(query, '-password').sort({ requestedAt: -1 });
   res.json(requests);
+});
+
+// POST /admin/premium-requests/mark-seen
+router.post('/premium-requests/mark-seen', async (req, res) => {
+  try {
+    await Student.updateMany({ premiumStatus: 'pending', requestSeen: false }, { requestSeen: true });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to mark as seen.' });
+  }
 });
 
 // POST /admin/approve-premium/:id

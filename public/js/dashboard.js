@@ -90,8 +90,9 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
     if (panelId === 'files') loadAdminFiles();
     if (panelId === 'students') window.loadAdminStudents();
     if (panelId === 'requests') {
-      window.loadPremiumRequests();
+      _showAllRequests = false;
       markRequestsAsSeen();
+      window.loadPremiumRequests();
     }
     if (panelId === 'premium') window.loadPremiumAdminFiles();
     if (panelId === 'categories') loadCatStructure();
@@ -119,6 +120,8 @@ function markRequestsAsSeen() {
   localStorage.setItem('lastSeenRequests', Date.now());
   const bRequests = document.getElementById('badge-requests');
   if (bRequests) bRequests.style.display = 'none';
+  // Persist seen status to DB
+  fetch('/admin/premium-requests/mark-seen', { method: 'POST' }).catch(() => {});
 }
 
 // ── Sidebar toggle (mobile) ───────────────────────────────────────────────────
@@ -784,20 +787,38 @@ window.loadAdminStudents = async function () {
   }
 }
 
-window.loadPremiumRequests = async function () {
+let _showAllRequests = false;
+
+window.loadPremiumRequests = async function (showAll) {
+  if (showAll !== undefined) _showAllRequests = showAll;
   const el = document.getElementById('premiumRequestList');
   if (!el) return;
 
   try {
-    const res = await fetch('/admin/premium-requests');
+    const url = _showAllRequests
+      ? '/admin/premium-requests?all=true'
+      : '/admin/premium-requests';
+    const res = await fetch(url);
     const requests = await res.json();
 
+    const toggleLabel = _showAllRequests
+      ? '🔵 Show New Only'
+      : '📋 Show All Pending';
+    const toggleFn = `window.loadPremiumRequests(${!_showAllRequests})`;
+
     if (!requests || !requests.length) {
-      el.innerHTML = '<div class="empty-state">No pending premium requests.</div>';
+      el.innerHTML = `
+        <div style="display:flex; justify-content:flex-end; margin-bottom:0.8rem;">
+          <button class="btn-ghost small" onclick="${toggleFn}">${toggleLabel}</button>
+        </div>
+        <div class="empty-state">${_showAllRequests ? 'No pending requests at all.' : '✅ No new requests! <br><small style="color:var(--muted)">All caught up.</small>'}</div>`;
       return;
     }
 
     el.innerHTML = `
+    <div style="display:flex; justify-content:flex-end; margin-bottom:0.8rem;">
+      <button class="btn-ghost small" onclick="${toggleFn}">${toggleLabel}</button>
+    </div>
     <div class="file-table-wrap">
       <table class="file-table">
         <thead>
@@ -810,10 +831,10 @@ window.loadPremiumRequests = async function () {
         </thead>
         <tbody>
           ${requests.map(r => `
-            <tr>
+            <tr style="${!_showAllRequests ? 'background:rgba(99,102,241,0.05);' : ''}">
               <td style="font-weight:600; color:var(--text)">@${escHtml(r.username)}</td>
               <td style="color:var(--muted)">${escHtml(r.email)}</td>
-              <td>${formatDate(r.registeredAt)}</td>
+              <td>${formatDate(r.requestedAt || r.registeredAt)}</td>
               <td>
                 <div style="display:flex; gap:0.5rem;">
                   <button class="btn-primary small" onclick="window.approvePremium('${r._id}')" style="background:#10b981; border-color:#10b981; padding: 4px 10px;">Approve</button>
@@ -829,6 +850,7 @@ window.loadPremiumRequests = async function () {
     el.innerHTML = '<div class="empty-state">Error loading requests.</div>';
   }
 }
+
 
 window.approvePremium = async function (id) {
   if (!confirm('Approve this student for Premium access?')) return;
