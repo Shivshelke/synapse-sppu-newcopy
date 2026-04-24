@@ -15,12 +15,19 @@ let deleteTargetId = null;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
-  await loadConfig();
-  await loadStats();
-  await loadRecentFiles();
-  await loadAdminFiles();
-  await loadCatStructure();
-  setupDragDrop();
+  // Fire all independent calls in parallel for maximum speed
+  try {
+    await Promise.all([
+      loadConfig(),
+      loadStats(),
+      loadRecentFiles(),
+      loadAdminFiles(),
+      loadCatStructure()
+    ]);
+    setupDragDrop();
+  } catch (e) {
+    console.error('Init error:', e);
+  }
 }
 
 // ── Config ────────────────────────────────────────────────────────────────────
