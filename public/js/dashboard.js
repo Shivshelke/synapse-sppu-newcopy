@@ -699,16 +699,28 @@ window.loadAdminStudents = async function () {
           <tr>
             <th>Student Username</th>
             <th>Email Addr.</th>
+            <th>Premium Status</th>
             <th>Account Registered Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           ${students.map(s => {
+      let premiumBadge = '<span class="badge" style="background:var(--muted); color:#fff">Free</span>';
+      if (s.isPremium) premiumBadge = '<span class="badge" style="background:#10b981; color:#fff">Premium ✨</span>';
+      else if (s.premiumStatus === 'pending') premiumBadge = '<span class="badge" style="background:#f59e0b; color:#111">Pending ⏳</span>';
+
+      const revokeBtn = s.isPremium 
+        ? `<button class="btn-del small" onclick="window.revokePremium('${s._id}')" style="padding: 4px 10px;">Revoke</button>` 
+        : '';
+
       return `
             <tr>
               <td style="font-weight:600; color:var(--text)">@${escHtml(s.username)}</td>
               <td style="color:var(--muted)">${escHtml(s.email)}</td>
+              <td>${premiumBadge}</td>
               <td>${formatDate(s.registeredAt)}</td>
+              <td>${revokeBtn}</td>
             </tr>
             `;
     }).join('')}
@@ -798,6 +810,23 @@ window.rejectPremium = async function (id) {
     alert('Network error');
   }
 }
+
+window.revokePremium = async function (id) {
+  if (!confirm('Are you sure you want to REVOKE premium access for this student?')) return;
+  try {
+    const res = await fetch(`/admin/revoke-premium/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      alert(data.message);
+      window.loadAdminStudents();
+      loadStats();
+    } else {
+      alert(data.error || 'Failed to revoke');
+    }
+  } catch (e) {
+    alert('Network error');
+  }
+};
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', init);

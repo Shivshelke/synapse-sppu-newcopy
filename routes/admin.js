@@ -157,4 +157,20 @@ router.post('/reject-premium/:id', async (req, res) => {
   }
 });
 
+// POST /admin/revoke-premium/:id
+router.post('/revoke-premium/:id', async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
+
+    student.isPremium = false;
+    student.premiumStatus = 'none';
+    await student.save();
+
+    res.json({ success: true, message: 'Premium access revoked successfully.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to revoke premium access.' });
+  }
+});
+
 module.exports = router;
