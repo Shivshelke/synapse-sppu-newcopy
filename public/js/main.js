@@ -47,6 +47,7 @@ let currentYear = null;
 let currentBranch = null;
 let allFiles = [];
 let allKeywords = [];
+let currentUsername = null;
 
 // ── Init ────────────────────────────────────────────────────────────────────
 async function init() {
@@ -59,6 +60,7 @@ async function init() {
     CONFIG = await configRes.json();
     const stats = await statsRes.json();
     const authData = await authRes.json();
+    currentUsername = authData.username || null;
 
     // Update hero stats
     document.getElementById('statTotal').textContent = stats.total;
@@ -82,6 +84,10 @@ async function init() {
       isPremiumUser = authData.isPremium || false;
       window.userPremiumStatus = authData.premiumStatus || 'none';
       togglePremiumState();
+
+      // Auto-fill feedback name
+      const fbNameInput = document.getElementById('fbName');
+      if (fbNameInput) fbNameInput.value = authData.username;
     } else {
       isLoggedIn = false;
       isPremiumUser = false;
@@ -358,7 +364,12 @@ async function submitFeedback() {
     
     if (data.success) {
       showFbAlert('Message sent! Thank you for your feedback.', 'success');
-      nameInput.value = '';
+      // Only clear name if not logged in
+      if (isLoggedIn && currentUsername) {
+        nameInput.value = currentUsername;
+      } else {
+        nameInput.value = '';
+      }
       msgInput.value = '';
     } else {
       showFbAlert(data.error || 'Failed to send feedback.', 'error');
