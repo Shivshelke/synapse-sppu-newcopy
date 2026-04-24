@@ -84,12 +84,25 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
     if (panelId === 'requests') window.loadPremiumRequests();
     if (panelId === 'premium') window.loadPremiumAdminFiles();
     if (panelId === 'categories') loadCatStructure();
-    if (panelId === 'feedback') loadFeedback();
+    if (panelId === 'feedback') {
+      loadFeedback();
+      markFeedbackAsRead();
+    }
 
     // Close sidebar on mobile
     if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
   });
 });
+
+async function markFeedbackAsRead() {
+  try {
+    await fetch('/api/feedback/mark-read', { method: 'POST' });
+    const bFeedback = document.getElementById('badge-feedback');
+    if (bFeedback) bFeedback.style.display = 'none';
+  } catch (e) {
+    console.error('Mark read error:', e);
+  }
+}
 
 // ── Sidebar toggle (mobile) ───────────────────────────────────────────────────
 function toggleSidebar() {
@@ -825,6 +838,7 @@ window.rejectPremium = async function (id) {
     if (data.success) {
       alert(data.message);
       window.loadPremiumRequests();
+      loadStats();
     } else {
       alert(data.error || 'Failed to reject');
     }

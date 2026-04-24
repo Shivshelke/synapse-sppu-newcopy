@@ -187,7 +187,7 @@ router.get('/stats', async (req, res) => {
       File.countDocuments(),
       require('../models/Student').countDocuments(),
       require('../models/Student').countDocuments({ premiumStatus: 'pending' }),
-      Feedback.countDocuments(),
+      Feedback.countDocuments({ isRead: false }),
       File.aggregate([{ $group: { _id: '$year', count: { $sum: 1 } } }])
     ]);
     const byYear = {};
@@ -233,6 +233,17 @@ router.post('/feedback', async (req, res) => {
   } catch(e) { console.error('Formspree integration error:', e); }
 
   res.json({ success: true, message: 'Thanks for your feedback! 🚀' });
+});
+
+// POST /api/feedback/mark-read
+router.post('/feedback/mark-read', async (req, res) => {
+  if (!req.session.isAdmin) return res.status(403).json({ error: 'Unauthorized' });
+  try {
+    await Feedback.updateMany({ isRead: false }, { isRead: true });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 // POST /api/chat (Gemini AI Chatbot)
 router.post('/chat', async (req, res) => {

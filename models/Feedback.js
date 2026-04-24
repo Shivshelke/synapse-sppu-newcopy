@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const schema = new mongoose.Schema({
   name:    { type: String, default: 'Anonymous' },
   message: { type: String, required: true },
-  date:    { type: Date, default: Date.now }
+  date:    { type: Date, default: Date.now },
+  isRead:  { type: Boolean, default: false }
 });
 module.exports = mongoose.model('Feedback', schema);
