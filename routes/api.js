@@ -208,6 +208,24 @@ router.post('/feedback', async (req, res) => {
       await t.sendMail({ from: `"Synapse" <${process.env.EMAIL_USER}>`, to: process.env.EMAIL_USER, subject: `Feedback from ${safeName}`, text: message.trim() });
     } catch(e) { console.error('Email error:', e); }
   }
+  // Formspree Integration
+  try {
+    const data = JSON.stringify({ name: safeName, message: message.trim() });
+    const options = {
+      hostname: 'formspree.io',
+      path: '/f/xjgjlvgo',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
+      }
+    };
+    const formReq = https.request(options);
+    formReq.on('error', (e) => console.error('Formspree error:', e));
+    formReq.write(data);
+    formReq.end();
+  } catch(e) { console.error('Formspree integration error:', e); }
+
   res.json({ success: true, message: 'Thanks for your feedback! 🚀' });
 });
 // POST /api/chat (Gemini AI Chatbot)
