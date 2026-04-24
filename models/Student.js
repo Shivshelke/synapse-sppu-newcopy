@@ -5,6 +5,7 @@ const schema = new mongoose.Schema({
   password: { type: String, required: true },
   isPremium: { type: Boolean, default: false },
   premiumStatus: { type: String, enum: ['none', 'pending', 'active'], default: 'none' },
+  requestedAt: { type: Date },
   registeredAt: { type: Date, default: Date.now }
 });
 module.exports = mongoose.model('Student', schema);

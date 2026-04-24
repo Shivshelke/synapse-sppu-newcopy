@@ -55,8 +55,16 @@ async function loadStats() {
     }
 
     if (stats.pendingPremium > 0) {
-      bRequests.textContent = stats.pendingPremium;
-      bRequests.style.display = 'inline-block';
+      // Only show badge if latest request is newer than last seen
+      const lastSeen = localStorage.getItem('lastSeenRequests') || 0;
+      const latestReq = stats.latestRequestAt ? new Date(stats.latestRequestAt).getTime() : 0;
+      
+      if (latestReq > lastSeen) {
+        bRequests.textContent = stats.pendingPremium;
+        bRequests.style.display = 'inline-block';
+      } else {
+        bRequests.style.display = 'none';
+      }
     } else {
       bRequests.style.display = 'none';
     }
@@ -81,7 +89,10 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
     // Refresh file list on panel switch
     if (panelId === 'files') loadAdminFiles();
     if (panelId === 'students') window.loadAdminStudents();
-    if (panelId === 'requests') window.loadPremiumRequests();
+    if (panelId === 'requests') {
+      window.loadPremiumRequests();
+      markRequestsAsSeen();
+    }
     if (panelId === 'premium') window.loadPremiumAdminFiles();
     if (panelId === 'categories') loadCatStructure();
     if (panelId === 'feedback') {
@@ -102,6 +113,12 @@ async function markFeedbackAsRead() {
   } catch (e) {
     console.error('Mark read error:', e);
   }
+}
+
+function markRequestsAsSeen() {
+  localStorage.setItem('lastSeenRequests', Date.now());
+  const bRequests = document.getElementById('badge-requests');
+  if (bRequests) bRequests.style.display = 'none';
 }
 
 // ── Sidebar toggle (mobile) ───────────────────────────────────────────────────
