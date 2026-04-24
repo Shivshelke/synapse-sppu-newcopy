@@ -158,16 +158,30 @@ router.post('/approve-premium/:id', async (req, res) => {
       const mailOptions = {
         from: `"Synapse SPPU" <${process.env.EMAIL_USER}>`,
         to: student.email,
-        subject: 'Premium Access Approved! 🚀 - Synapse SPPU',
+        subject: '🚀 Your Premium Access is Active! - Synapse SPPU',
         html: `
-          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            <h2 style="color: #6366f1;">Congratulations @${student.username}!</h2>
-            <p>Your request for <b>Premium Access</b> has been approved by the Admin.</p>
-            <p>You can now access all Premium Question Papers, Notes, and exclusive content on the portal.</p>
-            <br>
-            <a href="https://synapse-sppu.vercel.app" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Dashboard</a>
-            <br><br>
-            <p style="color: #666; font-size: 0.9em;">Happy Studying!<br>Team Synapse</p>
+          <div style="background-color: #0f172a; padding: 40px 20px; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+            <div style="max-width: 500px; margin: 0 auto; background: #1e293b; border-radius: 20px; overflow: hidden; border: 1px solid #334155; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+              <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 30px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">SYNAPSE PREMIUM</h1>
+              </div>
+              <div style="padding: 40px 30px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Access Granted</div>
+                <h2 style="color: white; margin: 0 0 20px 0; font-size: 28px; font-weight: 700;">Welcome to the Inner Circle, @${student.username}!</h2>
+                <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+                  Your request for <b>Premium Access</b> has been verified and approved. You now have unlimited access to all exclusive PYQs, detailed notes, and premium features.
+                </p>
+                <a href="https://synapse-sppu.vercel.app" style="display: inline-block; background: #6366f1; color: white; padding: 16px 32px; border-radius: 12px; font-weight: 600; text-decoration: none; transition: all 0.2s;">
+                  Start Learning Now
+                </a>
+                <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid #334155;">
+                  <p style="color: #64748b; font-size: 13px; margin: 0;">
+                    Unleash your potential with Synapse.<br>
+                    Keep learning, keep growing.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         `
       };
@@ -202,13 +216,33 @@ router.post('/reject-premium/:id', async (req, res) => {
         to: student.email,
         subject: 'Update on your Premium Request - Synapse SPPU',
         html: `
-          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            <h2 style="color: #ef4444;">Hello @${student.username}</h2>
-            <p>Your request for Premium Access could not be approved at this time.</p>
-            <p><b>Possible reasons:</b> Invalid payment screenshot, incorrect details, or technical issues.</p>
-            <p>Please try requesting again with a valid proof of payment.</p>
-            <br>
-            <p style="color: #666; font-size: 0.9em;">Regards,<br>Team Synapse</p>
+          <div style="background-color: #0f172a; padding: 40px 20px; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+            <div style="max-width: 500px; margin: 0 auto; background: #1e293b; border-radius: 20px; overflow: hidden; border: 1px solid #334155; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+              <div style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); padding: 30px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em;">PREMIUM REQUEST</h1>
+              </div>
+              <div style="padding: 40px 30px; text-align: center;">
+                <div style="color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Action Required</div>
+                <h2 style="color: white; margin: 0 0 20px 0; font-size: 24px; font-weight: 700;">Hello @${student.username},</h2>
+                <p style="color: #94a3b8; font-size: 16px; line-height: 1.6; margin-bottom: 30px; text-align: left;">
+                  Your request for Premium Access could not be approved at this time. This is usually due to:
+                  <ul style="color: #94a3b8; text-align: left; padding-left: 20px; margin-top: 10px;">
+                    <li>Missing or unclear payment screenshot.</li>
+                    <li>Incorrect transaction details.</li>
+                    <li>Duplicate request.</li>
+                  </ul>
+                  Please ensure your proof of payment is clear and try submitting the request again.
+                </p>
+                <a href="https://synapse-sppu.vercel.app" style="display: inline-block; border: 1px solid #475569; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 600; text-decoration: none;">
+                  Re-submit Request
+                </a>
+                <div style="margin-top: 40px; padding-top: 25px; border-top: 1px solid #334155;">
+                  <p style="color: #64748b; font-size: 13px; margin: 0;">
+                    Need help? Contact support via the dashboard feedback section.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         `
       };
