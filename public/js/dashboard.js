@@ -55,16 +55,8 @@ async function loadStats() {
     }
 
     if (stats.pendingPremium > 0) {
-      // Only show badge if latest request is newer than last seen
-      const lastSeen = localStorage.getItem('lastSeenRequests') || 0;
-      const latestReq = stats.latestRequestAt ? new Date(stats.latestRequestAt).getTime() : 0;
-      
-      if (latestReq > lastSeen) {
-        bRequests.textContent = stats.pendingPremium;
-        bRequests.style.display = 'inline-block';
-      } else {
-        bRequests.style.display = 'none';
-      }
+      bRequests.textContent = stats.pendingPremium;
+      bRequests.style.display = 'inline-block';
     } else {
       bRequests.style.display = 'none';
     }
@@ -90,7 +82,6 @@ document.querySelectorAll('.nav-item[data-panel]').forEach(item => {
     if (panelId === 'files') loadAdminFiles();
     if (panelId === 'students') window.loadAdminStudents();
     if (panelId === 'requests') {
-      _showAllRequests = false;
       markRequestsAsSeen();
       window.loadPremiumRequests();
     }
@@ -116,12 +107,14 @@ async function markFeedbackAsRead() {
   }
 }
 
-function markRequestsAsSeen() {
-  localStorage.setItem('lastSeenRequests', Date.now());
-  const bRequests = document.getElementById('badge-requests');
-  if (bRequests) bRequests.style.display = 'none';
-  // Persist seen status to DB
-  fetch('/admin/premium-requests/mark-seen', { method: 'POST' }).catch(() => {});
+async function markRequestsAsSeen() {
+  try {
+    await fetch('/admin/premium-requests/mark-seen', { method: 'POST' });
+    const bRequests = document.getElementById('badge-requests');
+    if (bRequests) bRequests.style.display = 'none';
+  } catch (e) {
+    console.error('Mark seen error:', e);
+  }
 }
 
 // ── Sidebar toggle (mobile) ───────────────────────────────────────────────────
@@ -787,38 +780,20 @@ window.loadAdminStudents = async function () {
   }
 }
 
-let _showAllRequests = false;
-
-window.loadPremiumRequests = async function (showAll) {
-  if (showAll !== undefined) _showAllRequests = showAll;
+window.loadPremiumRequests = async function () {
   const el = document.getElementById('premiumRequestList');
   if (!el) return;
 
   try {
-    const url = _showAllRequests
-      ? '/admin/premium-requests?all=true'
-      : '/admin/premium-requests';
-    const res = await fetch(url);
+    const res = await fetch('/admin/premium-requests');
     const requests = await res.json();
 
-    const toggleLabel = _showAllRequests
-      ? '🔵 Show New Only'
-      : '📋 Show All Pending';
-    const toggleFn = `window.loadPremiumRequests(${!_showAllRequests})`;
-
     if (!requests || !requests.length) {
-      el.innerHTML = `
-        <div style="display:flex; justify-content:flex-end; margin-bottom:0.8rem;">
-          <button class="btn-ghost small" onclick="${toggleFn}">${toggleLabel}</button>
-        </div>
-        <div class="empty-state">${_showAllRequests ? 'No pending requests at all.' : '✅ No new requests! <br><small style="color:var(--muted)">All caught up.</small>'}</div>`;
+      el.innerHTML = '<div class="empty-state">No pending premium requests.</div>';
       return;
     }
 
     el.innerHTML = `
-    <div style="display:flex; justify-content:flex-end; margin-bottom:0.8rem;">
-      <button class="btn-ghost small" onclick="${toggleFn}">${toggleLabel}</button>
-    </div>
     <div class="file-table-wrap">
       <table class="file-table">
         <thead>
@@ -831,7 +806,7 @@ window.loadPremiumRequests = async function (showAll) {
         </thead>
         <tbody>
           ${requests.map(r => `
-            <tr style="${!_showAllRequests ? 'background:rgba(99,102,241,0.05);' : ''}">
+            <tr>
               <td style="font-weight:600; color:var(--text)">@${escHtml(r.username)}</td>
               <td style="color:var(--muted)">${escHtml(r.email)}</td>
               <td>${formatDate(r.requestedAt || r.registeredAt)}</td>

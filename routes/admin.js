@@ -120,13 +120,9 @@ router.post('/config/subject', (req, res) => res.json({ success: true }));
 router.delete('/config/subject', (req, res) => res.json({ success: true }));
 router.post('/config/branch', (req, res) => res.json({ success: true }));
 
-// GET /admin/premium-requests?all=true (all pending) or default (unseen only)
+// GET /admin/premium-requests — always returns ALL pending requests
 router.get('/premium-requests', async (req, res) => {
-  const showAll = req.query.all === 'true';
-  const query = showAll
-    ? { premiumStatus: 'pending' }
-    : { premiumStatus: 'pending', requestSeen: false };
-  const requests = await Student.find(query, '-password').sort({ requestedAt: -1 });
+  const requests = await Student.find({ premiumStatus: 'pending' }, '-password').sort({ requestedAt: -1 });
   res.json(requests);
 });
 
