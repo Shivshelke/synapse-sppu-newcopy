@@ -3,6 +3,7 @@
  */
 require('dotenv').config();
 const express    = require('express');
+const nodemailer = require('nodemailer');
 const multer     = require('multer');
 const { v2: cloudinary } = require('cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -146,7 +147,29 @@ router.post('/approve-premium/:id', async (req, res) => {
     student.premiumStatus = 'active';
     await student.save();
 
-    res.json({ success: true, message: 'Student approved for Premium access!' });
+    // Send Email Notification
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
+      const mailOptions = {
+        from: `"Synapse SPPU" <${process.env.EMAIL_USER}>`,
+        to: student.email,
+        subject: 'Premium Access Approved! 🚀 - Synapse SPPU',
+        html: `
+          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #6366f1;">Congratulations @${student.username}!</h2>
+            <p>Your request for <b>Premium Access</b> has been approved by the Admin.</p>
+            <p>You can now access all Premium Question Papers, Notes, and exclusive content on the portal.</p>
+            <br>
+            <a href="https://synapse-sppu.vercel.app" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Dashboard</a>
+            <br><br>
+            <p style="color: #666; font-size: 0.9em;">Happy Studying!<br>Team Synapse</p>
+          </div>
+        `
+      };
+      transporter.sendMail(mailOptions).catch(e => console.error('Email send error:', e));
+    }
+
+    res.json({ success: true, message: 'Student approved and notified!' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to approve student.' });
   }
@@ -161,7 +184,28 @@ router.post('/reject-premium/:id', async (req, res) => {
     student.premiumStatus = 'none';
     await student.save();
 
-    res.json({ success: true, message: 'Student request rejected.' });
+    // Send Email Notification
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
+      const mailOptions = {
+        from: `"Synapse SPPU" <${process.env.EMAIL_USER}>`,
+        to: student.email,
+        subject: 'Update on your Premium Request - Synapse SPPU',
+        html: `
+          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #ef4444;">Hello @${student.username}</h2>
+            <p>Your request for Premium Access could not be approved at this time.</p>
+            <p><b>Possible reasons:</b> Invalid payment screenshot, incorrect details, or technical issues.</p>
+            <p>Please try requesting again with a valid proof of payment.</p>
+            <br>
+            <p style="color: #666; font-size: 0.9em;">Regards,<br>Team Synapse</p>
+          </div>
+        `
+      };
+      transporter.sendMail(mailOptions).catch(e => console.error('Email send error:', e));
+    }
+
+    res.json({ success: true, message: 'Student rejected and notified.' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to reject student.' });
   }
