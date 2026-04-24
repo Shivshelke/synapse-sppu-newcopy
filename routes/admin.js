@@ -139,25 +139,15 @@ router.post('/premium-requests/mark-seen', async (req, res) => {
 
 // POST /admin/approve-premium/:id
 router.post('/approve-premium/:id', async (req, res) => {
-  console.log(`\n--- Admin Action: Approve Premium for ID: ${req.params.id} ---`);
   try {
     const student = await Student.findById(req.params.id);
-    if (!student) {
-      console.log('❌ Error: Student not found in database.');
-      return res.status(404).json({ error: 'Student not found.' });
-    }
-    console.log(`Found student: ${student.username} (${student.email})`);
+    if (!student) return res.status(404).json({ error: 'Student not found.' });
 
     student.isPremium = true;
     student.premiumStatus = 'active';
     await student.save();
-    console.log('✅ Student updated to Premium in DB.');
 
     // Send Email Notification
-    console.log('Checking Email Config...');
-    console.log('EMAIL_USER:', process.env.EMAIL_USER ? 'SET' : 'MISSING');
-    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'SET' : 'MISSING');
-
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
@@ -181,9 +171,7 @@ router.post('/approve-premium/:id', async (req, res) => {
           </div>
         `
       };
-      console.log(`Sending email to: ${student.email}...`);
       await transporter.sendMail(mailOptions);
-      console.log(`✅ Email sent successfully to: ${student.email}`);
     }
 
     res.json({ success: true, message: 'Student approved and notified!' });
