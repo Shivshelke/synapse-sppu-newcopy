@@ -131,7 +131,7 @@ router.post('/buy-premium', async (req, res) => {
 
   await Student.updateOne(
     { username: req.session.studentUser }, 
-    { premiumStatus: 'pending', requestedAt: new Date() }
+    { premiumStatus: 'pending', requestedAt: new Date(), requestSeen: false }
   );
   res.json({ success: true, message: 'Your request for Premium access has been sent to the Admin! ✨' });
 });
