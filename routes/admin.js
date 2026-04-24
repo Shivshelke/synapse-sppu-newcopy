@@ -149,7 +149,12 @@ router.post('/approve-premium/:id', async (req, res) => {
 
     // Send Email Notification
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+      });
       const mailOptions = {
         from: `"Synapse SPPU" <${process.env.EMAIL_USER}>`,
         to: student.email,
