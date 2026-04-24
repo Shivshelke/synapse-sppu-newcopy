@@ -19,6 +19,12 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ── Simple Request Logger ──
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 const MongoStore = require('connect-mongo').default || require('connect-mongo');
 
 app.use(session({
