@@ -171,7 +171,9 @@ router.post('/approve-premium/:id', async (req, res) => {
           </div>
         `
       };
-      transporter.sendMail(mailOptions).catch(e => console.error('Email send error:', e));
+      console.log(`Sending email to: ${student.email}...`);
+      await transporter.sendMail(mailOptions);
+      console.log(`✅ Email sent successfully to: ${student.email}`);
     }
 
     res.json({ success: true, message: 'Student approved and notified!' });
