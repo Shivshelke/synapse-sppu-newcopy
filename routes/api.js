@@ -286,10 +286,7 @@ router.post('/chat', async (req, res) => {
           { role: "user", content: message }
         ],
         temperature: 0.7,
-        max_tokens: 1024,
-        extra_body: {
-          chat_template_kwargs: { thinking: true, reasoning_effort: "low" }
-        }
+        max_tokens: 512
       });
 
       console.log("🤖 Chatbot: Using NVIDIA DeepSeek API");
