@@ -276,42 +276,49 @@ router.post('/chat', async (req, res) => {
   try {
     // 1. Try NVIDIA DeepSeek if available
     if (nvidiaClient) {
-      const completion = await nvidiaClient.chat.completions.create({
-        model: "deepseek-ai/deepseek-v4-pro",
-        messages: [
-          { 
-            role: "system", 
-            content: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your creator is Shivam Shelke, a visionary developer. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences." 
-          },
-          { role: "user", content: message }
-        ],
-        temperature: 0.7,
-        max_tokens: 512
-      });
+      try {
+        const completion = await nvidiaClient.chat.completions.create({
+          model: "deepseek-ai/deepseek-v3",
+          messages: [
+            { 
+              role: "system", 
+              content: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your creator is Shivam Shelke, a visionary developer. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences." 
+            },
+            { role: "user", content: message }
+          ],
+          temperature: 0.7,
+          max_tokens: 512
+        });
 
-      console.log("🤖 Chatbot: Using NVIDIA DeepSeek API");
-      const reply = completion.choices[0].message.content;
-      if (reply) return res.json({ reply });
+        console.log("🤖 Chatbot: Using NVIDIA DeepSeek API");
+        const reply = completion.choices[0].message.content;
+        if (reply) return res.json({ reply });
+      } catch (nvError) {
+        console.error("NVIDIA API Error:", nvError.message);
+      }
     }
 
     // 2. Fallback to Gemini if NVIDIA fails/missing
     if (genAI) {
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your creator is Shivam Shelke, a visionary developer. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences."
-      });
-      console.log("⚠️ Chatbot: Falling back to Gemini");
-      const result = await model.generateContent(`User asked: "${message}"`);
-      const response = await result.response;
-      const reply = response.text();
-      if (reply) return res.json({ reply });
+      try {
+        const model = genAI.getGenerativeModel({ 
+          model: "gemini-1.5-flash",
+          systemInstruction: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your creator is Shivam Shelke, a visionary developer. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences."
+        });
+        console.log("⚠️ Chatbot: Falling back to Gemini");
+        const result = await model.generateContent(`User asked: "${message}"`);
+        const response = await result.response;
+        const reply = response.text();
+        if (reply) return res.json({ reply });
+      } catch (gemError) {
+        console.error("Gemini API Error:", gemError.message);
+      }
     }
 
-    throw new Error('ALL_MODELS_FAILED');
+    return res.json({ reply: getFallbackReply(message) });
   } catch (error) {
-    console.error("Chat Error:", error.message || error);
-    let reply = getFallbackReply(message);
-    res.json({ reply });
+    console.error("Final Chat Error:", error.message || error);
+    res.json({ reply: getFallbackReply(message) });
   }
 });
 
