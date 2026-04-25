@@ -274,55 +274,18 @@ router.post('/chat', async (req, res) => {
   };
 
   try {
-    // 1. Try NVIDIA DeepSeek R1 (More stable on NVIDIA right now)
-    if (nvidiaClient) {
-      try {
-        console.log("Checking NVIDIA DeepSeek (R1)...");
-        
-        const nvPromise = nvidiaClient.chat.completions.create({
-          model: "deepseek-ai/deepseek-r1",
-          messages: [{ role: "user", content: message }],
-          max_tokens: 1024,
-        });
-
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('NVIDIA_TIMEOUT')), 20000)
-        );
-
-        const completion = await Promise.race([nvPromise, timeoutPromise]);
-        const reply = completion.choices[0].message.content;
-        if (reply) {
-          console.log("🤖 DeepSeek Success!");
-          return res.json({ reply });
-        }
-      } catch (nvError) {
-        console.error("❌ DeepSeek skipped:", nvError.message);
-      }
-    }
-
-    // 2. Try Gemini 1.0 Pro (Most reliable fallback)
     if (genAI) {
-      try {
-        console.log("Checking Gemini (1.0-pro)...");
-        const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
-        const result = await model.generateContent(message);
-        const response = await result.response;
-        const reply = response.text();
-        if (reply) {
-          console.log("✅ Gemini Success!");
-          return res.json({ reply });
-        }
-      } catch (gemError) {
-        console.error("❌ Gemini failed:", gemError.message);
-      }
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent(message);
+      const response = await result.response;
+      const reply = response.text();
+      if (reply) return res.json({ reply });
     }
-
-    // 3. Static Fallback
-    console.log("❗ All AI failed. Static reply.");
-    return res.json({ reply: getFallbackReply(message) });
-
+    
+    // Fallback if AI fails
+    res.json({ reply: getFallbackReply(message) });
   } catch (error) {
-    console.error("Main Error:", error);
+    console.error("Chatbot Error:", error);
     res.json({ reply: getFallbackReply(message) });
   }
 });
