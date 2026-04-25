@@ -277,14 +277,15 @@ router.post('/chat', async (req, res) => {
     // 1. Try NVIDIA DeepSeek if available
     if (nvidiaClient) {
       try {
-        console.log("Attempting DeepSeek...");
+        console.log("Attempting NVIDIA DeepSeek...");
         const completion = await nvidiaClient.chat.completions.create({
-          model: "deepseek-ai/deepseek-v3", // Common name on NVIDIA
+          model: "deepseek-ai/deepseek-v3", 
           messages: [
-            { role: "system", content: "You are the SYNAPSE AI assistant. Creator: Shivam Shelke. Tone: Professional." },
+            { role: "system", content: "You are a helpful SPPU assistant. Creator: Shivam Shelke." },
             { role: "user", content: message }
           ],
-          max_tokens: 512
+          max_tokens: 512,
+          temperature: 0.1 // Lower for stability
         });
 
         const reply = completion.choices[0].message.content;
@@ -297,12 +298,13 @@ router.post('/chat', async (req, res) => {
       }
     }
 
-    // 2. Fallback to Gemini if NVIDIA fails
+    // 2. Fallback to Gemini
     if (genAI) {
       try {
-        console.log("Attempting Gemini...");
+        console.log("Attempting Gemini (latest)...");
+        // Using 'gemini-1.5-flash' but making sure it's correct for the SDK
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const result = await model.generateContent(`System: You are SYNAPSE assistant for SPPU portal. User: ${message}`);
+        const result = await model.generateContent(message);
         const response = await result.response;
         const reply = response.text();
         if (reply) {
@@ -314,8 +316,7 @@ router.post('/chat', async (req, res) => {
       }
     }
 
-    // 3. Last resort
-    console.log("❗ Chatbot: Using Static Fallback");
+    console.log("❗ Chatbot: All APIs failed, using static fallback.");
     return res.json({ reply: getFallbackReply(message) });
 
   } catch (error) {
