@@ -274,27 +274,31 @@ router.post('/chat', async (req, res) => {
   };
 
   try {
-    if (genAI) {
-      // Initialize with a professional persona
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are the SYNAPSE Assistant, a professional AI helper for the SYNAPSE SPPU PYQ Portal. Answer student queries about Pune University papers, branches, and premium features politely and concisely. If you don't know something, suggest they check the home page."
+    if (process.env.GEMINI_API_KEY) {
+      console.log("Attempting direct v1 REST call to Gemini...");
+      const fetch = require('node-fetch');
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `You are the SYNAPSE Assistant. Answer this: ${message}` }] }]
+        })
       });
-      
-      const result = await model.generateContent(message);
-      const response = await result.response;
-      const reply = response.text();
-      
-      if (reply) {
-        console.log("🤖 Gemini Success with New Key!");
-        return res.json({ reply });
+
+      const data = await response.json();
+      if (data.candidates && data.candidates[0].content.parts[0].text) {
+        console.log("✅ Gemini Success via v1 REST!");
+        return res.json({ reply: data.candidates[0].content.parts[0].text });
+      } else {
+        console.error("❌ Gemini API Error:", JSON.stringify(data));
       }
     }
     
-    // Fallback if AI is unavailable
     res.json({ reply: getFallbackReply(message) });
   } catch (error) {
-    console.error("New Chatbot Error:", error.message);
+    console.error("REST Chat Error:", error.message);
     res.json({ reply: getFallbackReply(message) });
   }
 });
