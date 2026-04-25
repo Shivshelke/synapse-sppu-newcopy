@@ -282,7 +282,7 @@ router.post('/chat', async (req, res) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `You are the SYNAPSE Assistant. Answer this: ${message}` }] }]
+          contents: [{ parts: [{ text: `You are the SYNAPSE Assistant for SPPU students. Answer very concisely and to the point. Use bullet points if needed. Keep it short. User asked: ${message}` }] }]
         })
       });
 
