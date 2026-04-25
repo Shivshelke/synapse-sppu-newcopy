@@ -274,53 +274,48 @@ router.post('/chat', async (req, res) => {
   };
 
   try {
-    // 1. Try NVIDIA DeepSeek if available
+    // 1. Try NVIDIA DeepSeek
     if (nvidiaClient) {
       try {
-        console.log("Attempting NVIDIA DeepSeek...");
+        console.log("Checking NVIDIA DeepSeek...");
         const completion = await nvidiaClient.chat.completions.create({
           model: "deepseek-ai/deepseek-v3", 
-          messages: [
-            { role: "system", content: "You are a helpful SPPU assistant. Creator: Shivam Shelke." },
-            { role: "user", content: message }
-          ],
-          max_tokens: 512,
-          temperature: 0.1 // Lower for stability
+          messages: [{ role: "user", content: message }],
+          max_tokens: 512
         });
-
         const reply = completion.choices[0].message.content;
         if (reply) {
-          console.log("🤖 Chatbot: DeepSeek Success");
+          console.log("🤖 DeepSeek Success!");
           return res.json({ reply });
         }
       } catch (nvError) {
-        console.error("❌ NVIDIA Error:", nvError.message);
+        console.error("❌ DeepSeek failed:", nvError.message);
       }
     }
 
-    // 2. Fallback to Gemini
+    // 2. Try Gemini
     if (genAI) {
       try {
-        console.log("Attempting Gemini (latest)...");
-        // Using 'gemini-1.5-flash' but making sure it's correct for the SDK
+        console.log("Checking Gemini...");
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await model.generateContent(message);
         const response = await result.response;
         const reply = response.text();
         if (reply) {
-          console.log("✅ Chatbot: Gemini Success");
+          console.log("✅ Gemini Success!");
           return res.json({ reply });
         }
       } catch (gemError) {
-        console.error("❌ Gemini Error:", gemError.message);
+        console.error("❌ Gemini failed:", gemError.message);
       }
     }
 
-    console.log("❗ Chatbot: All APIs failed, using static fallback.");
+    // 3. Static Fallback
+    console.log("❗ All AI failed. Static reply.");
     return res.json({ reply: getFallbackReply(message) });
 
   } catch (error) {
-    console.error("Critical Chat Error:", error);
+    console.error("Main Error:", error);
     res.json({ reply: getFallbackReply(message) });
   }
 });
