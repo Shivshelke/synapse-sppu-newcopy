@@ -274,7 +274,6 @@ router.post('/chat', async (req, res) => {
   };
 
   try {
-  try {
     if (process.env.GEMINI_API_KEY) {
       const fetch = require('node-fetch');
       const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"];
