@@ -276,39 +276,24 @@ router.post('/chat', async (req, res) => {
   try {
     if (process.env.GEMINI_API_KEY) {
       const fetch = require('node-fetch');
-      const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"];
-      const versionsToTry = ["v1beta", "v1"];
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `You are the SYNAPSE Assistant. Answer this: ${message}` }] }]
+        })
+      });
 
-      for (const ver of versionsToTry) {
-        for (const mod of modelsToTry) {
-          try {
-            console.log(`Trying ${mod} on ${ver}...`);
-            const url = `https://generativelanguage.googleapis.com/${ver}/models/${mod}:generateContent?key=${process.env.GEMINI_API_KEY}`;
-            const response = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: `You are the SYNAPSE Assistant. Answer this: ${message}` }] }]
-              })
-            });
-
-            const data = await response.json();
-            if (response.ok && data.candidates && data.candidates[0].content.parts[0].text) {
-              console.log(`✅ Success! Working Model: ${mod} (${ver})`);
-              return res.json({ reply: data.candidates[0].content.parts[0].text });
-            } else {
-              console.log(`❌ ${mod} on ${ver} failed: ${response.status}`);
-            }
-          } catch (innerErr) {
-            // Silently try next one
-          }
-        }
+      const data = await response.json();
+      if (data.candidates && data.candidates[0].content.parts[0].text) {
+        return res.json({ reply: data.candidates[0].content.parts[0].text });
       }
     }
     
     res.json({ reply: getFallbackReply(message) });
   } catch (error) {
-    console.error("Auto-Finder Error:", error.message);
     res.json({ reply: getFallbackReply(message) });
   }
 });
