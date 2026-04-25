@@ -274,34 +274,42 @@ router.post('/chat', async (req, res) => {
   };
 
   try {
+  try {
     if (process.env.GEMINI_API_KEY) {
-      console.log("Attempting direct v1 REST call to Gemini...");
-      console.log("Using Key Prefix:", process.env.GEMINI_API_KEY.substring(0, 5) + "...");
       const fetch = require('node-fetch');
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
-      
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `You are the SYNAPSE Assistant. Answer this: ${message}` }] }]
-        })
-      });
+      const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"];
+      const versionsToTry = ["v1beta", "v1"];
 
-      console.log("Gemini Status Code:", response.status);
+      for (const ver of versionsToTry) {
+        for (const mod of modelsToTry) {
+          try {
+            console.log(`Trying ${mod} on ${ver}...`);
+            const url = `https://generativelanguage.googleapis.com/${ver}/models/${mod}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: `You are the SYNAPSE Assistant. Answer this: ${message}` }] }]
+              })
+            });
 
-      const data = await response.json();
-      if (data.candidates && data.candidates[0].content.parts[0].text) {
-        console.log("✅ Gemini Success via v1 REST!");
-        return res.json({ reply: data.candidates[0].content.parts[0].text });
-      } else {
-        console.error("❌ Gemini API Error:", JSON.stringify(data));
+            const data = await response.json();
+            if (response.ok && data.candidates && data.candidates[0].content.parts[0].text) {
+              console.log(`✅ Success! Working Model: ${mod} (${ver})`);
+              return res.json({ reply: data.candidates[0].content.parts[0].text });
+            } else {
+              console.log(`❌ ${mod} on ${ver} failed: ${response.status}`);
+            }
+          } catch (innerErr) {
+            // Silently try next one
+          }
+        }
       }
     }
     
     res.json({ reply: getFallbackReply(message) });
   } catch (error) {
-    console.error("REST Chat Error:", error.message);
+    console.error("Auto-Finder Error:", error.message);
     res.json({ reply: getFallbackReply(message) });
   }
 });
