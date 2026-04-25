@@ -288,7 +288,7 @@ router.post('/chat', async (req, res) => {
         temperature: 0.7,
         max_tokens: 1024,
         extra_body: {
-          chat_template_kwargs: { thinking: true, reasoning_effort: "high" }
+          chat_template_kwargs: { thinking: true, reasoning_effort: "low" }
         }
       });
 
