@@ -275,7 +275,8 @@ router.post('/chat', async (req, res) => {
 
   try {
     if (genAI) {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      // Force using 'v1' API instead of 'v1beta' to avoid 404
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
       const result = await model.generateContent(message);
       const response = await result.response;
       const reply = response.text();
