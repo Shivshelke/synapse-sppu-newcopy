@@ -274,15 +274,14 @@ router.post('/chat', async (req, res) => {
   };
 
   try {
-    // 1. Try NVIDIA DeepSeek with 20s timeout
+    // 1. Try NVIDIA DeepSeek R1 (More stable on NVIDIA right now)
     if (nvidiaClient) {
       try {
-        console.log("Checking NVIDIA DeepSeek (v4-pro)...");
+        console.log("Checking NVIDIA DeepSeek (R1)...");
         
         const nvPromise = nvidiaClient.chat.completions.create({
-          model: "deepseek-ai/deepseek-v4-pro",
+          model: "deepseek-ai/deepseek-r1",
           messages: [{ role: "user", content: message }],
-          temperature: 0.5,
           max_tokens: 1024,
         });
 
@@ -301,11 +300,11 @@ router.post('/chat', async (req, res) => {
       }
     }
 
-    // 2. Try Gemini (Fixed Model ID)
+    // 2. Try Gemini 1.0 Pro (Most reliable fallback)
     if (genAI) {
       try {
-        console.log("Checking Gemini (1.5-flash)...");
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        console.log("Checking Gemini (1.0-pro)...");
+        const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
         const result = await model.generateContent(message);
         const response = await result.response;
         const reply = response.text();
