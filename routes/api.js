@@ -292,6 +292,7 @@ router.post('/chat', async (req, res) => {
         }
       });
 
+      console.log("🤖 Chatbot: Using NVIDIA DeepSeek API");
       const reply = completion.choices[0].message.content;
       if (reply) return res.json({ reply });
     }
@@ -302,6 +303,7 @@ router.post('/chat', async (req, res) => {
         model: "gemini-1.5-flash",
         systemInstruction: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your creator is Shivam Shelke, a visionary developer. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences."
       });
+      console.log("⚠️ Chatbot: Falling back to Gemini");
       const result = await model.generateContent(`User asked: "${message}"`);
       const response = await result.response;
       const reply = response.text();
