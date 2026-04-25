@@ -274,19 +274,31 @@ router.post('/chat', async (req, res) => {
   };
 
   try {
-    if (genAI) {
-      // Force using 'v1' API instead of 'v1beta' to avoid 404
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
-      const result = await model.generateContent(message);
-      const response = await result.response;
-      const reply = response.text();
-      if (reply) return res.json({ reply });
+    if (process.env.GEMINI_API_KEY) {
+      console.log("Attempting direct fetch to Gemini...");
+      const fetch = require('node-fetch'); // Standard fetch
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+      
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: message }] }]
+        })
+      });
+
+      const data = await response.json();
+      if (data.candidates && data.candidates[0].content.parts[0].text) {
+        console.log("✅ Gemini Success via Fetch!");
+        return res.json({ reply: data.candidates[0].content.parts[0].text });
+      } else {
+        console.error("❌ Gemini API Error Data:", JSON.stringify(data));
+      }
     }
     
-    // Fallback if AI fails
     res.json({ reply: getFallbackReply(message) });
   } catch (error) {
-    console.error("Chatbot Error:", error);
+    console.error("Direct Chat Error:", error.message);
     res.json({ reply: getFallbackReply(message) });
   }
 });
