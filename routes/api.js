@@ -277,9 +277,9 @@ router.post('/chat', async (req, res) => {
     // 1. Try NVIDIA DeepSeek
     if (nvidiaClient) {
       try {
-        console.log("Checking NVIDIA DeepSeek...");
+        console.log("Checking NVIDIA DeepSeek (v4-pro)...");
         const completion = await nvidiaClient.chat.completions.create({
-          model: "deepseek-ai/deepseek-v3", 
+          model: "deepseek-ai/deepseek-v4-pro", // Reverting to your original ID
           messages: [{ role: "user", content: message }],
           max_tokens: 512
         });
@@ -293,11 +293,11 @@ router.post('/chat', async (req, res) => {
       }
     }
 
-    // 2. Try Gemini
+    // 2. Try Gemini Pro (Alternative)
     if (genAI) {
       try {
-        console.log("Checking Gemini...");
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        console.log("Checking Gemini Pro...");
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
         const result = await model.generateContent(message);
         const response = await result.response;
         const reply = response.text();
