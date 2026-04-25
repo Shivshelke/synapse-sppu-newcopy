@@ -275,30 +275,41 @@ router.post('/chat', async (req, res) => {
 
   try {
     if (process.env.GEMINI_API_KEY) {
-      console.log("Attempting direct fetch to Gemini...");
-      const fetch = require('node-fetch'); // Standard fetch
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+      const fetch = require('node-fetch');
+      const models = ["gemini-1.5-flash", "gemini-pro"];
+      const versions = ["v1", "v1beta"];
       
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: message }] }]
-        })
-      });
+      for (const ver of versions) {
+        for (const mod of models) {
+          try {
+            console.log(`Checking ${mod} on ${ver}...`);
+            const url = `https://generativelanguage.googleapis.com/${ver}/models/${mod}:generateContent?key=${process.env.GEMINI_API_KEY}`;
+            
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: message }] }]
+              })
+            });
 
-      const data = await response.json();
-      if (data.candidates && data.candidates[0].content.parts[0].text) {
-        console.log("✅ Gemini Success via Fetch!");
-        return res.json({ reply: data.candidates[0].content.parts[0].text });
-      } else {
-        console.error("❌ Gemini API Error Data:", JSON.stringify(data));
+            const data = await response.json();
+            if (response.ok && data.candidates && data.candidates[0].content.parts[0].text) {
+              console.log(`✅ Success with ${mod} (${ver})!`);
+              return res.json({ reply: data.candidates[0].content.parts[0].text });
+            } else {
+              console.log(`❌ ${mod} (${ver}) failed: ${response.status} - ${data.error?.message || 'Unknown error'}`);
+            }
+          } catch (e) {
+            console.log(`⚠️ ${mod} (${ver}) request error:`, e.message);
+          }
+        }
       }
     }
     
     res.json({ reply: getFallbackReply(message) });
   } catch (error) {
-    console.error("Direct Chat Error:", error.message);
+    console.error("Direct Chat Final Error:", error.message);
     res.json({ reply: getFallbackReply(message) });
   }
 });
