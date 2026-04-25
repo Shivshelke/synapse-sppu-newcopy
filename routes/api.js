@@ -275,15 +275,26 @@ router.post('/chat', async (req, res) => {
 
   try {
     if (genAI) {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      // Initialize with a professional persona
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        systemInstruction: "You are the SYNAPSE Assistant, a professional AI helper for the SYNAPSE SPPU PYQ Portal. Answer student queries about Pune University papers, branches, and premium features politely and concisely. If you don't know something, suggest they check the home page."
+      });
+      
       const result = await model.generateContent(message);
       const response = await result.response;
       const reply = response.text();
-      if (reply) return res.json({ reply });
+      
+      if (reply) {
+        console.log("🤖 Gemini Success with New Key!");
+        return res.json({ reply });
+      }
     }
+    
+    // Fallback if AI is unavailable
     res.json({ reply: getFallbackReply(message) });
   } catch (error) {
-    console.error("Chatbot Error:", error);
+    console.error("New Chatbot Error:", error.message);
     res.json({ reply: getFallbackReply(message) });
   }
 });
