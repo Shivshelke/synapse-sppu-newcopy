@@ -276,6 +276,7 @@ router.post('/chat', async (req, res) => {
   try {
     if (process.env.GEMINI_API_KEY) {
       console.log("Attempting direct v1 REST call to Gemini...");
+      console.log("Using Key Prefix:", process.env.GEMINI_API_KEY.substring(0, 5) + "...");
       const fetch = require('node-fetch');
       const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
       
@@ -286,6 +287,8 @@ router.post('/chat', async (req, res) => {
           contents: [{ parts: [{ text: `You are the SYNAPSE Assistant. Answer this: ${message}` }] }]
         })
       });
+
+      console.log("Gemini Status Code:", response.status);
 
       const data = await response.json();
       if (data.candidates && data.candidates[0].content.parts[0].text) {
