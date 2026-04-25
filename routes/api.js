@@ -279,10 +279,13 @@ router.post('/chat', async (req, res) => {
       try {
         console.log("Checking NVIDIA DeepSeek (v4-pro)...");
         const completion = await nvidiaClient.chat.completions.create({
-          model: "deepseek-ai/deepseek-v4-pro", // Reverting to your original ID
+          model: "deepseek-ai/deepseek-v4-pro",
           messages: [{ role: "user", content: message }],
-          max_tokens: 512
+          temperature: 0.5,
+          top_p: 0.7,
+          max_tokens: 1024,
         });
+
         const reply = completion.choices[0].message.content;
         if (reply) {
           console.log("🤖 DeepSeek Success!");
