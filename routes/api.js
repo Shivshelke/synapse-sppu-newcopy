@@ -274,33 +274,38 @@ router.post('/chat', async (req, res) => {
   };
 
   try {
-    // 1. Try NVIDIA DeepSeek
+    // 1. Try NVIDIA DeepSeek with 20s timeout
     if (nvidiaClient) {
       try {
         console.log("Checking NVIDIA DeepSeek (v4-pro)...");
-        const completion = await nvidiaClient.chat.completions.create({
+        
+        const nvPromise = nvidiaClient.chat.completions.create({
           model: "deepseek-ai/deepseek-v4-pro",
           messages: [{ role: "user", content: message }],
           temperature: 0.5,
-          top_p: 0.7,
           max_tokens: 1024,
         });
 
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('NVIDIA_TIMEOUT')), 20000)
+        );
+
+        const completion = await Promise.race([nvPromise, timeoutPromise]);
         const reply = completion.choices[0].message.content;
         if (reply) {
           console.log("🤖 DeepSeek Success!");
           return res.json({ reply });
         }
       } catch (nvError) {
-        console.error("❌ DeepSeek failed:", nvError.message);
+        console.error("❌ DeepSeek skipped:", nvError.message);
       }
     }
 
-    // 2. Try Gemini Pro (Alternative)
+    // 2. Try Gemini (Fixed Model ID)
     if (genAI) {
       try {
-        console.log("Checking Gemini Pro...");
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        console.log("Checking Gemini (1.5-flash)...");
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await model.generateContent(message);
         const response = await result.response;
         const reply = response.text();
