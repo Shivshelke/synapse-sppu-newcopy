@@ -5,6 +5,11 @@ const express    = require('express');
 const nodemailer = require('nodemailer');
 const https      = require('https');
 const http       = require('http');
+const OpenAI     = require('openai');
+const nvidiaClient = process.env.NVIDIA_API_KEY ? new OpenAI({
+  apiKey: process.env.NVIDIA_API_KEY,
+  baseURL: 'https://integrate.api.nvidia.com/v1'
+}) : null;
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const genAI      = process.env.GEMINI_API_KEY ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY) : null;
 const router     = express.Router();
@@ -269,40 +274,44 @@ router.post('/chat', async (req, res) => {
   };
 
   try {
+    // 1. Try NVIDIA DeepSeek if available
+    if (nvidiaClient) {
+      const completion = await nvidiaClient.chat.completions.create({
+        model: "deepseek-ai/deepseek-v4-pro",
+        messages: [
+          { 
+            role: "system", 
+            content: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your creator is Shivam Shelke, a visionary developer. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences." 
+          },
+          { role: "user", content: message }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
+        extra_body: {
+          chat_template_kwargs: { thinking: true, reasoning_effort: "high" }
+        }
+      });
+
+      const reply = completion.choices[0].message.content;
+      if (reply) return res.json({ reply });
+    }
+
+    // 2. Fallback to Gemini if NVIDIA fails/missing
     if (genAI) {
-      // 1. Create model with system instruction
       const model = genAI.getGenerativeModel({ 
         model: "gemini-1.5-flash",
         systemInstruction: "You are the helpful assistant for SYNAPSE, an SPPU Engineering PYQ portal. Your creator is Shivam Shelke, a visionary developer. Your tone is friendly, professional, and concise. Only answer questions related to SPPU engineering, PYQs, and student features. Max 3 sentences."
       });
-
-      // 2. Wrap generateContent in a timeout to avoid Vercel hanging
-      const chatPromise = model.generateContent(`User asked: "${message}"`);
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 8000));
-
-      const result = await Promise.race([chatPromise, timeoutPromise]);
+      const result = await model.generateContent(`User asked: "${message}"`);
       const response = await result.response;
       const reply = response.text();
-
       if (reply) return res.json({ reply });
-      throw new Error('EMPTY_REPLY');
-    } else {
-      throw new Error('NO_GEN_AI');
     }
+
+    throw new Error('ALL_MODELS_FAILED');
   } catch (error) {
     console.error("Chat Error:", error.message || error);
-    
-    // Check for specific error types
     let reply = getFallbackReply(message);
-    
-    if (error.message && error.message.includes('RECITATION')) {
-      reply = "I'm sorry, I cannot answer that specific question for safety reasons. Is there anything else about SPPU papers I can help with?";
-    } else if (error.message && error.message.includes('429')) {
-      reply = "I'm getting a lot of questions right now! " + reply;
-    } else if (error.message === 'TIMEOUT') {
-      reply = "My AI brain is a bit slow right now, but here's what I know: " + reply;
-    }
-    
     res.json({ reply });
   }
 });
