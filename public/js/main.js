@@ -608,9 +608,19 @@ function handleChatKeypress(event) {
 
 function addMessageToChat(text, type) {
   const messagesContainer = document.getElementById('chatMessages');
+  if (!messagesContainer) return;
+
   const msgDiv = document.createElement('div');
   msgDiv.className = `chat-message ${type}-message`;
-  msgDiv.textContent = text;
+  
+  const now = new Date();
+  const timeStr = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+
+  msgDiv.innerHTML = `
+    <div class="message-content">${text}</div>
+    <div class="message-time">${timeStr}</div>
+  `;
+  
   messagesContainer.appendChild(msgDiv);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
