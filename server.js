@@ -35,6 +35,10 @@ app.use(session({
 // ── Static files ──────────────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ── SEO Files ─────────────────────────────────────────────────────────────────
+app.get('/robots.txt', (req, res) => res.sendFile(path.join(__dirname, 'public', 'robots.txt')));
+app.get('/sitemap.xml', (req, res) => res.sendFile(path.join(__dirname, 'public', 'sitemap.xml')));
+
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/auth',    require('./routes/auth'));
 app.use('/api',     require('./routes/api'));
