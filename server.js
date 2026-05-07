@@ -49,13 +49,13 @@ app.get('/sitemap.xml', (req, res) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://sppupyq-synapse.vercel.app/</loc>
-<lastmod>2024-05-07</lastmod>
+<lastmod>2026-05-07</lastmod>
 <changefreq>weekly</changefreq>
 <priority>1.0</priority>
 </url>
 <url>
 <loc>https://sppupyq-synapse.vercel.app/student-login.html</loc>
-<lastmod>2024-05-07</lastmod>
+<lastmod>2026-05-07</lastmod>
 <changefreq>monthly</changefreq>
 <priority>0.8</priority>
 </url>
