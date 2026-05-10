@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard.html
+
+Sitemap: https://sppupyq-synapse.vercel.app/sitemap.xml
