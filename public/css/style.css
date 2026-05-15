@@ -21,6 +21,22 @@
   --mobile-nav-bg: rgba(10, 10, 15, .97);
 }
 
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f3f4f6;
+  --surface2: #e5e7eb;
+  --border: #e2e8f0;
+  --border-light: #cbd5e1;
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-glow: rgba(79, 70, 229, 0.15);
+  --text: #111827;
+  --text-secondary: #4b5563;
+  --muted: #9ca3af;
+  --card-hover: #f9fafb;
+  --nav-bg: rgba(255, 255, 255, 0.85);
+}
+
 *,
 *::before,
 *::after {
@@ -317,7 +333,7 @@ a {
 .search-wrap input {
   flex: 1;
   padding: 1rem 1.5rem;
-  background: rgba(28, 28, 40, 0.6);
+  background: var(--surface);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: 14px;
