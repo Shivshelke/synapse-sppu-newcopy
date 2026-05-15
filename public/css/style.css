@@ -9,6 +9,7 @@
   --border: #2a2a3d;
   --border-light: #3a3a55;
   --accent: #6366f1;
+  --accent-secondary: #a855f7;
   --accent-hover: #4f52e0;
   --accent-glow: rgba(99, 102, 241, .25);
   --text: #f0f0f8;
@@ -28,6 +29,7 @@
   --border: #e2e8f0;
   --border-light: #cbd5e1;
   --accent: #4f46e5;
+  --accent-secondary: #7c3aed;
   --accent-hover: #4338ca;
   --accent-glow: rgba(79, 70, 229, 0.15);
   --text: #111827;
