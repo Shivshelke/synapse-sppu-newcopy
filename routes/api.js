@@ -118,33 +118,20 @@ router.get('/view/:id', async (req, res) => {
   }
 });
 
-const fs = require('fs');
-const path = require('path');
-const configPath = path.join(__dirname, '../data/config.json');
-
-let CONFIG = {};
-
-function loadConfigFromFile() {
-  try {
-    const raw = fs.readFileSync(configPath, 'utf8');
-    const fullConfig = JSON.parse(raw);
-    CONFIG = fullConfig.years;
-  } catch (e) {
-    console.error('Error loading config file:', e);
-    CONFIG = {
-      first: { label: '1st Year', branches: ['FE'], subjects: [] },
-      second: { label: '2nd Year', branches: [], subjects: {} },
-      third: { label: '3rd Year', branches: [], subjects: {} },
-      fourth: { label: '4th Year', branches: [], subjects: {} }
-    };
-  }
-}
-loadConfigFromFile();
+const CategoryConfig = require('../models/CategoryConfig');
 
 // GET /api/config
-router.get('/config', (req, res) => {
-  loadConfigFromFile();
-  res.json(CONFIG);
+router.get('/config', async (req, res) => {
+  try {
+    let doc = await CategoryConfig.findOne({ key: 'years_config' });
+    if (!doc) {
+      doc = await CategoryConfig.create({ key: 'years_config' });
+    }
+    res.json(doc.years);
+  } catch (e) {
+    console.error('Error loading config from DB:', e);
+    res.status(500).json({ error: 'Failed to load configuration.' });
+  }
 });
 
 // GET /api/files

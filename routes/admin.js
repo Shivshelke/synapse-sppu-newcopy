@@ -154,98 +154,87 @@ router.get('/students', async (req, res) => {
   res.json(students);
 });
 
-const fs = require('fs');
-const path = require('path');
-const configFilePath = path.join(__dirname, '../data/config.json');
-
-function readConfig() {
-  try {
-    return JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
-  } catch (e) {
-    console.error('Error reading config.json', e);
-    return null;
-  }
-}
-
-function writeConfig(data) {
-  try {
-    fs.writeFileSync(configFilePath, JSON.stringify(data, null, 2), 'utf8');
-    return true;
-  } catch (e) {
-    console.error('Error writing config.json', e);
-    return false;
-  }
-}
+const CategoryConfig = require('../models/CategoryConfig');
 
 // POST /admin/config/subject
-router.post('/config/subject', (req, res) => {
+router.post('/config/subject', async (req, res) => {
   const { year, branch, subject } = req.body;
   if (!year || !subject || !subject.trim()) {
     return res.status(400).json({ error: 'Year and Subject are required.' });
   }
 
-  const config = readConfig();
-  if (!config) return res.status(500).json({ error: 'Config read error.' });
+  try {
+    let doc = await CategoryConfig.findOne({ key: 'years_config' });
+    if (!doc) {
+      doc = new CategoryConfig({ key: 'years_config' });
+    }
 
-  const yearData = config.years[year];
-  if (!yearData) return res.status(400).json({ error: 'Invalid year.' });
+    const yearData = doc.years[year];
+    if (!yearData) return res.status(400).json({ error: 'Invalid year.' });
 
-  const cleanSubject = subject.trim();
+    const cleanSubject = subject.trim();
 
-  if (year === 'first') {
-    if (!Array.isArray(yearData.subjects)) {
-      yearData.subjects = [];
+    if (year === 'first') {
+      if (!Array.isArray(yearData.subjects)) {
+        yearData.subjects = [];
+      }
+      if (!yearData.subjects.includes(cleanSubject)) {
+        yearData.subjects.push(cleanSubject);
+      }
+    } else {
+      if (!branch) {
+        return res.status(400).json({ error: 'Branch is required for 2nd, 3rd, and 4th Year.' });
+      }
+      const cleanBranch = branch.trim();
+      if (!yearData.subjects || typeof yearData.subjects !== 'object' || Array.isArray(yearData.subjects)) {
+        yearData.subjects = {};
+      }
+      if (!yearData.subjects[cleanBranch]) {
+        yearData.subjects[cleanBranch] = [];
+      }
+      if (!yearData.subjects[cleanBranch].includes(cleanSubject)) {
+        yearData.subjects[cleanBranch].push(cleanSubject);
+      }
     }
-    if (!yearData.subjects.includes(cleanSubject)) {
-      yearData.subjects.push(cleanSubject);
-    }
-  } else {
-    if (!branch) {
-      return res.status(400).json({ error: 'Branch is required for 2nd, 3rd, and 4th Year.' });
-    }
-    const cleanBranch = branch.trim();
-    if (!yearData.subjects || typeof yearData.subjects !== 'object' || Array.isArray(yearData.subjects)) {
-      yearData.subjects = {};
-    }
-    if (!yearData.subjects[cleanBranch]) {
-      yearData.subjects[cleanBranch] = [];
-    }
-    if (!yearData.subjects[cleanBranch].includes(cleanSubject)) {
-      yearData.subjects[cleanBranch].push(cleanSubject);
-    }
-  }
 
-  if (writeConfig(config)) {
+    doc.markModified('years');
+    await doc.save();
     res.json({ success: true });
-  } else {
-    res.status(500).json({ error: 'Config write error.' });
+  } catch (e) {
+    console.error('Error saving subject config:', e);
+    res.status(500).json({ error: 'Database save error.' });
   }
 });
 
 router.delete('/config/subject', (req, res) => res.json({ success: true }));
 
 // POST /admin/config/branch
-router.post('/config/branch', (req, res) => {
+router.post('/config/branch', async (req, res) => {
   const { year, branch } = req.body;
   if (!year || !branch || !branch.trim()) {
     return res.status(400).json({ error: 'Year and Branch are required.' });
   }
 
-  const config = readConfig();
-  if (!config) return res.status(500).json({ error: 'Config read error.' });
+  try {
+    let doc = await CategoryConfig.findOne({ key: 'years_config' });
+    if (!doc) {
+      doc = new CategoryConfig({ key: 'years_config' });
+    }
 
-  const yearData = config.years[year];
-  if (!yearData) return res.status(400).json({ error: 'Invalid year.' });
+    const yearData = doc.years[year];
+    if (!yearData) return res.status(400).json({ error: 'Invalid year.' });
 
-  const cleanBranch = branch.trim();
-  if (!yearData.branches.includes(cleanBranch)) {
-    yearData.branches.push(cleanBranch);
-  }
+    const cleanBranch = branch.trim();
+    if (!yearData.branches.includes(cleanBranch)) {
+      yearData.branches.push(cleanBranch);
+    }
 
-  if (writeConfig(config)) {
+    doc.markModified('years');
+    await doc.save();
     res.json({ success: true });
-  } else {
-    res.status(500).json({ error: 'Config write error.' });
+  } catch (e) {
+    console.error('Error saving branch config:', e);
+    res.status(500).json({ error: 'Database save error.' });
   }
 });
 
