@@ -182,9 +182,6 @@ app.get('/', async (req, res) => {
   }
 });
 
-// ── Static files ──────────────────────────────────────────────────────────────
-app.use(express.static(path.join(__dirname, 'public')));
-
 // ── SEO Files ─────────────────────────────────────────────────────────────────
 app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
@@ -251,6 +248,11 @@ ${Array.from(urls).map(url => `  <url>
     res.send(sitemap.trim());
   }
 });
+
+// ── Static files ──────────────────────────────────────────────────────────────
+app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/auth', require('./routes/auth'));
