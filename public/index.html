@@ -69,10 +69,30 @@
     .faq-item:hover { border-color: var(--accent); transform: translateY(-2px); }
     .faq-item h3 { font-size: 1.15rem; margin-bottom: 0.8rem; color: var(--accent); font-family: 'Syne', sans-serif; }
     .faq-item p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+    
+    /* Directory Card Styles */
+    .directory-card { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important; }
+    .directory-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.3) !important;
+      background: rgba(255, 255, 255, 0.03) !important;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    }
+    .directory-branch-link { transition: background 0.2s ease; }
+    .directory-branch-link:hover {
+      background: rgba(99, 102, 241, 0.2) !important;
+    }
+    .directory-subject-link { transition: all 0.2s ease !important; }
+    .directory-subject-link:hover {
+      color: var(--text) !important;
+      background: rgba(255, 255, 255, 0.04);
+      padding-left: 0.6rem !important;
+    }
   </style>
   <script src="/js/theme.js" defer></script>
 </head>
 <body>
+<div id="seo-crawler-content" style="display:none;"></div>
 
 <!-- ── NAV ── -->
 <nav class="nav">
@@ -140,32 +160,32 @@
     <div class="section-header">
       <h2>Browse by Year <span class="pattern-badge">2024 Pattern</span></h2>
       <p>Select your year to explore branches and subjects: 
-        <a href="#first" style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">1st Year (FE)</a>
-        <a href="#second" style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">2nd Year (SE)</a>
-        <a href="#third" style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">3rd Year (TE)</a>
-        <a href="#fourth" style="text-decoration: underline; color: var(--accent); font-weight: 500;">4th Year (BE)</a>
+        <a href="/catalog/first" onclick="event.preventDefault(); selectYear('first');" style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">1st Year (FE)</a>
+        <a href="/catalog/second" onclick="event.preventDefault(); selectYear('second');" style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">2nd Year (SE)</a>
+        <a href="/catalog/third" onclick="event.preventDefault(); selectYear('third');" style="margin-right: 12px; text-decoration: underline; color: var(--accent); font-weight: 500;">3rd Year (TE)</a>
+        <a href="/catalog/fourth" onclick="event.preventDefault(); selectYear('fourth');" style="text-decoration: underline; color: var(--accent); font-weight: 500;">4th Year (BE)</a>
       </p>
     </div>
     <div class="year-grid">
-      <div class="year-card" onclick="location.hash = 'first'">
+      <div class="year-card" onclick="selectYear('first')">
         <div class="year-icon">I</div>
         <div class="year-label">1st Year</div>
         <div class="year-sub">Common subjects for all branches</div>
         <div class="year-count" id="count-first"><span class="skeleton" style="display:inline-block; width:55px; height:12px; border-radius:4px; margin-bottom:-2px;"></span></div>
       </div>
-      <div class="year-card" onclick="location.hash = 'second'">
+      <div class="year-card" onclick="selectYear('second')">
         <div class="year-icon">II</div>
         <div class="year-label">2nd Year</div>
         <div class="year-sub">Branch-specific courses begin</div>
         <div class="year-count" id="count-second"><span class="skeleton" style="display:inline-block; width:55px; height:12px; border-radius:4px; margin-bottom:-2px;"></span></div>
       </div>
-      <div class="year-card" onclick="location.hash = 'third'">
+      <div class="year-card" onclick="selectYear('third')">
         <div class="year-icon">III</div>
         <div class="year-label">3rd Year</div>
         <div class="year-sub">Advanced engineering subjects</div>
         <div class="year-count" id="count-third"><span class="skeleton" style="display:inline-block; width:55px; height:12px; border-radius:4px; margin-bottom:-2px;"></span></div>
       </div>
-      <div class="year-card" onclick="location.hash = 'fourth'">
+      <div class="year-card" onclick="selectYear('fourth')">
         <div class="year-icon">IV</div>
         <div class="year-label">4th Year</div>
         <div class="year-sub">Final year specializations</div>
@@ -344,6 +364,7 @@
       © <span id="footerYear"></span> SYNAPSE SPPU PYQ Portal. All rights reserved. &nbsp;|&nbsp;
       Made with ❤️ for SPPU Students
     </div>
+    <div id="seo-links-directory"></div>
   </div>
 </footer>
 <script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>

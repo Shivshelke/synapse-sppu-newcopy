@@ -98,62 +98,79 @@ async function init() {
     const configRes = await fetch('/api/config');
     CONFIG = await configRes.json();
     populateKeywords();
-    await handleHashChange();
+    await handleUrlRouting();
   } catch (e) { console.error('Config load error', e); }
 }
 
-let isHandlingHash = false;
+let isRouting = false;
 
-async function handleHashChange() {
-  if (isHandlingHash) return;
-  isHandlingHash = true;
+async function handleUrlRouting() {
+  if (isRouting) return;
+  isRouting = true;
 
   try {
-    const hash = decodeURIComponent(window.location.hash.replace('#', ''));
-    if (!hash) {
-      isHandlingHash = false;
-      return;
-    }
-
-    const parts = hash.split('/');
-    const year = parts[0];
-    const validYears = ['first', 'second', 'third', 'fourth'];
-    if (!validYears.includes(year)) {
-      isHandlingHash = false;
-      return;
-    }
-
-    // Load Year
-    selectYear(year);
-
-    if (year === 'first') {
-      const subject = parts[1];
-      if (subject) {
-        await selectSubject(subject);
+    const path = window.location.pathname;
+    const parts = path.split('/').filter(Boolean); // e.g. ["catalog", "second", "Computer-Engineering", "Discrete-Mathematics"]
+    
+    if (parts[0] === 'catalog') {
+      const year = parts[1];
+      const validYears = ['first', 'second', 'third', 'fourth'];
+      if (!validYears.includes(year)) {
+        isRouting = false;
+        return;
       }
-    } else {
-      const branch = parts[1];
-      const subject = parts[2];
-      if (branch) {
-        await selectBranch(branch, CONFIG[year]);
+
+      // Load Year
+      selectYear(year);
+
+      if (year === 'first') {
+        const subject = parts[2];
         if (subject) {
-          await selectSubject(subject);
+          const decodedSubject = decodeURIComponent(subject);
+          await selectSubject(decodedSubject);
+        }
+      } else {
+        const branch = parts[2];
+        const subject = parts[3];
+        if (branch) {
+          const decodedBranch = decodeURIComponent(branch);
+          await selectBranch(decodedBranch, CONFIG[year]);
+          if (subject) {
+            const decodedSubject = decodeURIComponent(subject);
+            await selectSubject(decodedSubject);
+          }
         }
       }
     }
   } catch (e) {
-    console.error('Error handling hash change', e);
+    console.error('Routing error:', e);
   } finally {
-    isHandlingHash = false;
+    isRouting = false;
   }
 }
-window.addEventListener('hashchange', handleHashChange);
+window.addEventListener('popstate', handleUrlRouting);
 
 function populateKeywords() {
   const suggestions = new Set();
   Object.values(CONFIG).forEach(yearData => {
     if (yearData.branches) yearData.branches.forEach(b => suggestions.add(b));
-    if (yearData.subjects) yearData.subjects.forEach(s => suggestions.add(s));
+    if (yearData.subjects) {
+      if (Array.isArray(yearData.subjects)) {
+        yearData.subjects.forEach(s => suggestions.add(s));
+      } else if (typeof yearData.subjects === 'object') {
+        Object.values(yearData.subjects).forEach(val => {
+          if (Array.isArray(val)) {
+            val.forEach(s => suggestions.add(s));
+          } else if (typeof val === 'object' && val !== null) {
+            Object.values(val).forEach(list => {
+              if (Array.isArray(list)) {
+                list.forEach(s => suggestions.add(s));
+              }
+            });
+          }
+        });
+      }
+    }
   });
   allKeywords = Array.from(suggestions).sort();
 }
@@ -163,8 +180,8 @@ function selectYear(year) {
   currentYear = year;
   currentBranch = null;
 
-  if (!isHandlingHash) {
-    window.location.hash = year;
+  if (!isRouting) {
+    history.pushState(null, '', `/catalog/${year}`);
   }
 
   const yearData = CONFIG[year];
@@ -206,8 +223,8 @@ function selectYear(year) {
 async function selectBranch(branch, yearData) {
   currentBranch = branch;
 
-  if (!isHandlingHash) {
-    window.location.hash = `${currentYear}/${branch}`;
+  if (!isRouting) {
+    history.pushState(null, '', `/catalog/${currentYear}/${encodeURIComponent(branch)}`);
   }
 
   // Highlight selected
@@ -357,11 +374,11 @@ function buildSubjectTags(subjects, isGrouped = false) {
 
 // ── Subject selection ─────────────────────────────────────────────────────────
 async function selectSubject(subject, pattern) {
-  if (!isHandlingHash) {
+  if (!isRouting) {
     if (currentYear === 'first') {
-      window.location.hash = `${currentYear}/${subject}`;
+      history.pushState(null, '', `/catalog/${currentYear}/${encodeURIComponent(subject)}`);
     } else {
-      window.location.hash = `${currentYear}/${currentBranch}/${subject}`;
+      history.pushState(null, '', `/catalog/${currentYear}/${encodeURIComponent(currentBranch)}/${encodeURIComponent(subject)}`);
     }
   }
 
@@ -391,7 +408,19 @@ async function selectSubject(subject, pattern) {
     `).join('');
 
     const res = await fetch(`/api/files?${params}`);
-    const files = await res.json();
+    let files = await res.json();
+
+    // Fallback: if no files found and we filtered by pattern, try without pattern filter
+    if ((!files || files.length === 0) && pattern) {
+      const fallbackParams = new URLSearchParams({ year: currentYear, subject });
+      if (currentBranch && currentBranch !== 'FE') fallbackParams.append('branch', currentBranch);
+      const fallbackRes = await fetch(`/api/files?${fallbackParams}`);
+      const fallbackFiles = await fallbackRes.json();
+      if (fallbackFiles && fallbackFiles.length > 0) {
+        files = fallbackFiles;
+      }
+    }
+
     allFiles = files;
     renderFileGrid(files, 'fileGrid');
   } catch (e) {
@@ -514,15 +543,28 @@ function goBack() {
   if (document.getElementById('fileStep').style.display !== 'none') {
     document.getElementById('fileStep').style.display = 'none';
     document.querySelectorAll('#subjectGrid .tag').forEach(t => t.classList.remove('active'));
+    if (!isRouting) {
+      if (currentYear === 'first') {
+        history.pushState(null, '', `/catalog/${currentYear}`);
+      } else {
+        history.pushState(null, '', `/catalog/${currentYear}/${encodeURIComponent(currentBranch)}`);
+      }
+    }
     return;
   }
   if (document.getElementById('subjectStep').style.display !== 'none' && currentYear !== 'first') {
     document.getElementById('subjectStep').style.display = 'none';
     document.querySelectorAll('#branchGrid .tag').forEach(t => t.classList.remove('active'));
+    if (!isRouting) {
+      history.pushState(null, '', `/catalog/${currentYear}`);
+    }
     return;
   }
   document.getElementById('browserPanel').style.display = 'none';
   currentYear = null; currentBranch = null;
+  if (!isRouting) {
+    history.pushState(null, '', `/`);
+  }
   document.getElementById('years').scrollIntoView({ behavior: 'smooth' });
 }
 
