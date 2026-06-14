@@ -131,11 +131,11 @@ async function generateSeoDirectory() {
           : `/catalog/${yearKey}/${encodeURIComponent(brKey)}`;
 
         directoryHtml += `
-        <div>
-          <a href="${branchUrl}" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(99, 102, 241, 0.1); color: var(--accent); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.6rem;" class="directory-branch-link">
-            <span style="font-size: 0.95rem;">📁</span> SPPU ${brKey}
-          </a>
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+        <details style="border: none; margin-bottom: 0.5rem;" class="directory-branch-details">
+          <summary style="display: inline-flex; align-items: center; gap: 6px; background: rgba(99, 102, 241, 0.1); color: var(--accent); padding: 0.4rem 0.8rem; border-radius: 8px; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.6rem; cursor: pointer; list-style: none; outline: none; user-select: none; width: max-content;" class="directory-branch-link">
+            <span style="font-size: 0.95rem;">📁</span> SPPU ${brKey} <span class="details-arrow">▼</span>
+          </summary>
+          <ul style="list-style: none; padding: 0 0 0.5rem 0.5rem; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; border-left: 1px solid var(--border); margin-left: 0.8rem; animation: slideFadeDown 0.25s ease-out;">
 `;
 
         Array.from(subjectsSet).sort().forEach(sub => {
@@ -154,7 +154,7 @@ async function generateSeoDirectory() {
 
         directoryHtml += `
           </ul>
-        </div>
+        </details>
 `;
       }
 

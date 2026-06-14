@@ -881,28 +881,38 @@ a {
   .nav-links {
     display: none;
     position: fixed;
-    top: 60px;
+    top: 70px;
     left: 0;
     right: 0;
     background: var(--mobile-nav-bg);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--border);
     flex-direction: column;
     align-items: stretch;
-    padding: 1rem 1.5rem 1.5rem;
-    gap: .4rem;
+    padding: 1.5rem;
+    gap: .6rem;
     z-index: 99;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
   }
 
   .nav-links.mobile-open {
     display: flex;
+    animation: fadeInDown 0.25s ease-out;
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .nav-links a {
-    padding: .75rem .5rem;
+    padding: .85rem .75rem;
     border-bottom: 1px solid var(--border);
     font-size: 1rem;
     color: var(--text);
+    font-weight: 500;
   }
 
   .nav-links a:last-child {
@@ -910,7 +920,7 @@ a {
   }
 
   .nav-links .btn-ghost {
-    margin-top: .5rem;
+    margin-top: .75rem;
     text-align: center;
   }
 
@@ -921,21 +931,23 @@ a {
 
   /* Hero */
   .hero {
-    padding: 6rem 1rem 3rem;
+    padding: 7rem 1.2rem 3rem;
     min-height: auto;
   }
 
   .hero h1 {
-    font-size: 2.6rem;
+    font-size: 2.5rem;
   }
 
   .hero-sub {
-    font-size: 1rem;
+    font-size: 1.05rem;
+    margin-bottom: 2rem;
   }
 
   .search-wrap {
     flex-direction: column;
-    gap: .5rem;
+    gap: .75rem;
+    width: 100%;
   }
 
   .search-wrap input {
@@ -944,33 +956,47 @@ a {
 
   .search-wrap button {
     width: 100%;
-    padding: .85rem;
+    padding: .95rem;
+  }
+
+  /* Suggestions Dropdown should span full width of search input on mobile */
+  .suggestions-dropdown {
+    right: 0 !important;
   }
 
   .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
+    width: 100%;
+    max-width: 440px;
+    margin: 2rem auto 0;
+  }
+
+  .stat-div {
+    display: none;
   }
 
   .stat-num {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
 
   /* Year grid */
   .year-grid {
     grid-template-columns: 1fr 1fr;
-    gap: .75rem;
+    gap: .85rem;
   }
 
   .year-card {
-    padding: 1.2rem 1rem;
+    padding: 1.5rem 1.2rem;
   }
 
   .year-icon {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 
   .year-label {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
 
   /* File grid */
@@ -979,44 +1005,52 @@ a {
   }
 
   .file-card {
-    padding: 1rem;
-    flex-wrap: wrap;
+    padding: 1.2rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
   }
 
   .file-actions {
-    flex-direction: row;
     width: 100%;
-    justify-content: flex-end;
-    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0;
   }
 
   .btn-view,
   .btn-download {
-    padding: .45rem .8rem;
-    font-size: .8rem;
+    flex: 1;
+    text-align: center;
+    padding: .6rem;
+    font-size: .85rem;
   }
 
   /* Tags / Browser */
   .tag-grid {
-    gap: .4rem;
+    gap: .5rem;
   }
 
   .tag {
-    padding: .45rem 1rem;
-    font-size: .82rem;
+    padding: .5rem 1.1rem;
+    font-size: .85rem;
   }
 
   /* About */
   .about-inner {
     grid-template-columns: 1fr;
+    gap: 2.5rem;
   }
 
   .about-card {
-    display: none;
+    display: block;
+    max-width: 320px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .about-text h2 {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
   }
 
   /* Feedback */
@@ -1026,39 +1060,40 @@ a {
   }
 
   .feedback-text h2 {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
   }
 
   /* Premium */
   .premium-card {
-    padding: 1.5rem 1rem;
+    padding: 2rem 1.2rem;
   }
 
   .premium-header h2 {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
   }
 
   .premium-content-grid {
     grid-template-columns: 1fr;
+    gap: 1.2rem;
   }
 
   /* Sections */
   .section {
-    padding: 3rem 0;
+    padding: 3.5rem 0;
   }
 
   .section-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
 
   /* Modals */
   .modal {
-    padding: 1.5rem;
+    padding: 1.8rem;
   }
 
   /* General */
   .container {
-    padding: 0 1rem;
+    padding: 0 1.2rem;
   }
 
   .browser-header {
@@ -1070,7 +1105,7 @@ a {
 
 @media (max-width: 480px) {
   .hero h1 {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 
   .year-grid {
@@ -1078,22 +1113,15 @@ a {
   }
 
   .hero-stats {
-    flex-direction: column;
-    gap: .75rem;
+    max-width: 340px;
   }
 
-  .stat-div {
-    display: none;
+  .stat-num {
+    font-size: 1.4rem;
   }
 
   .file-actions {
-    flex-direction: column;
-  }
-
-  .btn-view,
-  .btn-download {
-    width: 100%;
-    text-align: center;
+    flex-direction: row;
   }
 }
 
